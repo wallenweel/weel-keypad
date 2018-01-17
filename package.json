@@ -4,9 +4,10 @@
   "description": "A Virtual Number Keypad.",
   "main": "index.js",
   "scripts": {
+    "postinstall": "rollup-watch-fix",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run dev",
-    "dev": "rollup -c -w -m --environment NODE_ENV:development",
+    "dev": "rollup -c --environment NODE_ENV:development -m -w",
     "build": "rollup -c --environment NODE_ENV:production"
   },
   "author": "wallen",
@@ -19,12 +20,14 @@
     "babel-preset-stage-2": "^6.22.0",
     "eslint": "^4.15.0",
     "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-html": "^4.0.1",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
     "rollup": "^0.54.1",
     "rollup-plugin-babel": "^3.0.3",
-    "rollup-plugin-node-resolve": "^3.0.2"
+    "rollup-plugin-node-resolve": "^3.0.2",
+    "rollup-watch-fix": "^0.0.3"
   }
 }

@@ -1,5 +1,5 @@
 export default class Keypad {
   focus () {
-    console.log('has focused.');
+    console.log('has focused.')
   }
 }
