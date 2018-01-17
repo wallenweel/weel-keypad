@@ -1,11 +1,20 @@
+import resolve from 'rollup-plugin-node-resolve'
+import babel from 'rollup-plugin-babel'
+
 export default {
-  entry: 'src/main.js',
-  targets: [{
-    dest: 'dist/keypad.js',
+  input: 'src/main.js',
+  output: [{
+    file: 'dist/keypad.js',
     format: 'cjs'
   }, {
-    dest: 'dist/keypad.umd.js',
-    moduleName: 'weel-keypad',
+    file: 'dist/keypad.umd.js',
+    name: 'weel-keypad',
     format: 'umd'
-  }]
+  }],
+  plugins: [
+    resolve(),
+    babel({
+      exclude: 'node_modules/**'
+    })
+  ]
 }
