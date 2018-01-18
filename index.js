@@ -1,3 +1,6 @@
-import Keypad from './src/main'
+import './src/page.scss'
 
-export default Keypad
+/* global Keypad */
+const k = new Keypad()
+
+k.focus()
