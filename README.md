@@ -3,11 +3,14 @@
 
 ## 特性清单
 
-- [ ] 数字键盘布局
+- [x] 数字键盘布局
 - [ ] 明暗两色主题
-- [ ] 分离布局（Layout）与主题样式（Theme）
+- [x] 分离布局（Layout）与主题样式（Theme）
 - [ ] 基于选项的配置
-- [ ] Float 和 Flex 两种布局选项（Legacy 兼容）
+- [x] Flex 方式布局
+- [ ] Float 布局选项（Legacy 兼容）
+- [x ] 响应正常的可编辑元素（input、div[contenteditable]）
+- [ ] 按需叫出键盘
 
 ## 构建项目
 
