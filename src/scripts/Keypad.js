@@ -2,11 +2,10 @@ export const defaultOptions = {
   el: null, // target element
   input: null, // need to set value
   flex: true, // use flex layout
-  mobile: true,
+  mobile: true, // choose to use "touch" or "mouse" event
   onstart: null, // touchstart|keydown callback
   onend: null, // touchend|keyup callback,
-  inject: document.body, // the wrap element to be injected keypad
-  render: null // manually render layout
+  inject: document.body // the wrap element to be injected keypad
 }
 
 export const defaultLayouts = {

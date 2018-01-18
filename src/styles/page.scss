@@ -1,1 +1,49 @@
 @import "variables";
+
+main.container {
+  > h4 {
+    margin-top: 48px;
+  }
+
+  .passwords {
+    display: flex;
+
+    + input {
+      margin-bottom: 12px;
+    }
+
+    > i {
+      $sz: 32px;
+      border-radius: 4px;
+      border: 1px solid #eee;
+      height: $sz;
+      width: $sz;
+      margin: 2px;
+      justify-content: center;
+      align-items: center;
+      display: flex;
+
+      &::before {
+        content: "";
+        $sz: 10px;
+        border-radius: $sz / 2;
+        background: #333333;
+        height: $sz;
+        width: $sz;
+        display: block;
+
+        transition: opacity .25s ease, visibility .25s ease;
+        
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      &.on {
+        &::before {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+    }
+  }
+}
