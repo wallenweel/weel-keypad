@@ -1,5 +1,5 @@
 import Keypad from './Keypad'
-// import './main.scss'
+import './main.scss'
 
 const k = new Keypad()
 
