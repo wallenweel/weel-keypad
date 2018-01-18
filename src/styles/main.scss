@@ -3,8 +3,9 @@ kypd- {
     width: 100%;
     font-family: Arial, Helvetica, sans-serif;
     display: block;
-    position: fixed;
     bottom: 0;
+    z-index: 999999999;
+    position: fixed;
 
     transition: opacity .35s,
                 visibility .35s,
