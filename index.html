@@ -18,11 +18,18 @@
     <![endif]-->
   </head>
   <body>
-    <main class="contaner">
+    <main class="container">
       <div class="input-group input-group-lg">
-        <span class="input-group-addon" id="sizing-addon1">Test</span>
-        <input type="text" class="form-control" placeholder="Type something in here" aria-describedby="sizing-addon1">
+        <span class="input-group-addon">Focus / Blur</span>
+        <input type="text" class="form-control js-normal-input" placeholder="Type something in here" aria-describedby="sizing-addon1">
       </div>
+
+      <div class="input-group input-group-lg">
+        <span class="input-group-btn">
+          <button class="btn btn-default js-toggle-keypad" type="button">Toggle</button>
+        </span>
+        <input type="text" class="form-control js-toggle-input" placeholder="Search for...">
+      </div><!-- /input-group -->
     </main>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
