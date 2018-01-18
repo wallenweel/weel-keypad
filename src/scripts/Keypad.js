@@ -1,6 +1,7 @@
 export const defaultOptions = {
   el: null, // target element
   flex: true, // use flex layout
+  mobile: true,
   start: null, // touchstart|keydown callback
   end: null, // touchend|keyup callback,
   inject: document.body, // the wrap element to be injected keypad
@@ -29,6 +30,16 @@ export default class Keypad {
     if (el) this.listen(el)
 
     this.inject()
+  }
+
+  get events () {
+    const { mobile } = this.options
+
+    return {
+      start: mobile ? 'touchstart' : 'mousedown',
+      end: mobile ? 'touchend' : 'mouseup',
+      move: mobile ? 'touchmove' : 'mousemove'
+    }
   }
 
   prefix (type = 'elem', name = '') {
@@ -61,14 +72,14 @@ export default class Keypad {
 
         _key.setAttribute(this.prefix('attr', 'touch'), '')
 
-        _key.addEventListener('touchstart', ev => {
+        _key.addEventListener(this.events.start, ev => {
           ev.preventDefault()
           ev.stopPropagation()
 
           _key.setAttribute(this.prefix('attr', 'key-status'), 'start')
         }, false)
 
-        _key.addEventListener('touchend', ev => {
+        _key.addEventListener(this.events.end, ev => {
           ev.preventDefault()
           ev.stopPropagation()
 

@@ -17,7 +17,7 @@ pre-Alpha ✔ --> Alpha --> Beta
 - [ ] Float 布局选项（Legacy 兼容）
 - [x] 响应正常的可编辑元素（input、div[contenteditable]）
 - [ ] 按需叫出键盘
-- [ ] 支持桌面端使用
+- [x] 支持桌面端鼠标事件
 
 ## 构建项目
 
