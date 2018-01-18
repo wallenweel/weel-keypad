@@ -89,7 +89,11 @@ export default class Keypad {
           const code = target.getAttribute(this.prefix('attr', 'key-code'))
 
           if (this.input.value && code === 'backspace') {
-            this.input.value = this.input.value.slice(0, -1)
+            const p = this.input.value
+            const s = this.input.selectionStart
+
+            this.input.value = p.slice(0, s - 1) + p.slice(s)
+            this.input.selectionEnd = s - 1
           }
 
           const value = target.getAttribute(this.prefix('attr', 'key-value'))

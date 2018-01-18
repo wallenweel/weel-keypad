@@ -1,4 +1,3 @@
-import 'normalize.css'
 import './src/styles/page.scss'
 
 const isMobile = /Mobile/.test(navigator.userAgent)
