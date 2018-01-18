@@ -1,0 +1,63 @@
+kypd- {
+  &wrap, &flex-wrap {
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    display: block;
+    position: fixed;
+    bottom: 0;
+
+    transition: opacity .35s,
+                visibility .35s,
+                transform .25s cubic-bezier(0.215, 0.610, 0.355, 1);
+
+    &[data-kypd-status="none"] {
+      display: none;
+    }
+
+    &[data-kypd-status="ready"] {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(100%);
+    }
+    
+    &[data-kypd-status="active"] {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0%);
+    }
+  }
+}
+
+kypd-flex- {
+  &container {
+    width: inherit;
+
+    justify-content: center;
+    display: flex;
+  }
+  
+  &content {
+    align-items: center;
+    flex-direction: column;
+    display: flex;
+
+    &[data-kypd-name="numberPad"] {
+      width: 100%;
+      max-width: 240px;
+    }
+  }
+
+  &key-row {
+    width: 100%;
+    justify-content: space-between;
+    display: flex;
+  }
+
+  &key {
+    height: 48px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+  }
+}
