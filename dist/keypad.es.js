@@ -167,11 +167,12 @@ var slicedToArray = function () {
 
 var defaultOptions = {
   el: null, // target element
+  input: null, // need to set value
   flex: true, // use flex layout
-  start: null, // touchstart|keydown callback
-  end: null, // touchend|keyup callback,
-  inject: document.body, // the wrap element to be injected keypad
-  render: null // manually render layout
+  mobile: true, // choose to use "touch" or "mouse" event
+  onstart: null, // touchstart|keydown callback
+  onend: null, // touchend|keyup callback,
+  inject: document.body // the wrap element to be injected keypad
 };
 
 var defaultLayouts = {
@@ -184,11 +185,12 @@ var Keypad = function () {
     var layouts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     classCallCheck(this, Keypad);
 
-    this.options = Object.assign(defaultOptions, options);
-    this.layouts = Object.assign(defaultLayouts, layouts);
+    this.options = Object.assign({}, defaultOptions, options);
+    this.layouts = Object.assign({}, defaultLayouts, layouts);
 
-    this.input = null;
-    this.wrap = document.querySelector(this.prefix('elem', 'wrap'));
+    this.input = this.options['input'];
+    this.inputValue = null;
+    this.wrap = null;
 
     var el = this.options.el;
 
@@ -244,31 +246,52 @@ var Keypad = function () {
 
             _key.setAttribute(_this.prefix('attr', 'touch'), '');
 
-            _key.addEventListener('touchstart', function (ev) {
+            _key.addEventListener(_this.events.start, function (ev) {
               ev.preventDefault();
               ev.stopPropagation();
 
               _key.setAttribute(_this.prefix('attr', 'key-status'), 'start');
+
+              if (typeof _this.options['onstart'] === 'function') {
+                var prevent = _this.options['onstart'].call(_this, [keyText, keyValue, keyCode]);
+
+                if (prevent) return true;
+              }
             }, false);
 
-            _key.addEventListener('touchend', function (ev) {
+            _key.addEventListener(_this.events.end, function (ev) {
               ev.preventDefault();
               ev.stopPropagation();
 
               _key.setAttribute(_this.prefix('attr', 'key-status'), '');
 
               var target = ev.currentTarget;
+              var value = target.getAttribute(_this.prefix('attr', 'key-value'));
               var code = target.getAttribute(_this.prefix('attr', 'key-code'));
 
+              if (typeof _this.options['onend'] === 'function') {
+                var prevent = _this.options['onend'].call(_this, [keyText, keyValue, keyCode]);
+
+                if (prevent) return true;
+              }
+
+              if (!_this.input) return true;
+
+              var v = _this.input.value;
+              var s = _this.input.selectionStart;
+
               if (_this.input.value && code === 'backspace') {
-                _this.input.value = _this.input.value.slice(0, -1);
+                v = v.slice(0, s - 1) + v.slice(s);
+                s--;
               }
 
-              var value = target.getAttribute(_this.prefix('attr', 'key-value'));
-
-              if (_this.input && value) {
-                _this.input.value += value;
+              if (value) {
+                v = v.slice(0, s) + value + v.slice(s);
+                s++;
               }
+
+              _this.input.value = v;
+              _this.input.selectionEnd = s;
             }, false);
 
             _keyRow.appendChild(_key);
@@ -422,9 +445,35 @@ var Keypad = function () {
       });
     }
   }, {
-    key: 'focus',
-    value: function focus() {
-      console.log('has focused.');
+    key: 'show',
+    value: function show() {
+      this.wrap.setAttribute(this.prefix('attr', 'status'), 'active');
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.wrap.setAttribute(this.prefix('attr', 'status'), 'ready');
+    }
+  }, {
+    key: 'toggle',
+    value: function toggle() {
+      if (this.wrap.getAttribute(this.prefix('attr', 'status')) === 'active') {
+        this.hide();
+      } else {
+        this.show();
+      }
+    }
+  }, {
+    key: 'events',
+    get: function get$$1() {
+      var mobile = this.options.mobile;
+
+
+      return {
+        start: mobile ? 'touchstart' : 'mousedown',
+        end: mobile ? 'touchend' : 'mouseup',
+        move: mobile ? 'touchmove' : 'mousemove'
+      };
     }
   }], [{
     key: 'istype',
@@ -442,7 +491,7 @@ var Keypad = function () {
 var css = "kypd-wrap, kypd-flex-wrap {\n  width: 100%;\n  font-family: Arial, Helvetica, sans-serif;\n  display: block;\n  position: fixed;\n  bottom: 0;\n  -webkit-transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-wrap[data-kypd-status=\"none\"], kypd-flex-wrap[data-kypd-status=\"none\"] {\n    display: none; }\n  kypd-wrap[data-kypd-status=\"ready\"], kypd-flex-wrap[data-kypd-status=\"ready\"] {\n    opacity: 0;\n    visibility: hidden;\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%); }\n  kypd-wrap[data-kypd-status=\"active\"], kypd-flex-wrap[data-kypd-status=\"active\"] {\n    opacity: 1;\n    visibility: visible;\n    -webkit-transform: translateY(0%);\n            transform: translateY(0%); }\n\nkypd-flex-container {\n  width: inherit;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-content {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n  kypd-flex-content[data-kypd-name=\"numberPad\"] {\n    width: 100%;\n    max-width: 240px; }\n\nkypd-flex-key-row {\n  width: 100%;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key {\n  height: 48px;\n  width: 100%;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n";
 __$$styleInject(css);
 
-var css$2 = "kypd-wrap, kypd-flex-wrap {\n  background: #ffffff; }\n\nkypd-flex-container {\n  border-top: 1px #f5f5f5 solid; }\n\nkypd-flex-key {\n  border-radius: 10px;\n  background: #ffffff;\n  color: #0077ff;\n  font-size: 16px;\n  -webkit-transition: background 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-radius 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n  transition: background 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-radius 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }\n  kypd-flex-key[data-kypd-key-status=\"start\"] {\n    border-radius: 2px;\n    background: #0077ff;\n    color: #ffffff; }\n";
+var css$2 = "kypd-wrap, kypd-flex-wrap {\n  background: #ffffff; }\n\nkypd-flex-container {\n  border-top: 1px #f5f5f5 solid; }\n\nkypd-flex-key {\n  cursor: default;\n  border-radius: 10px;\n  background: #ffffff;\n  color: #0077ff;\n  font-size: 16px;\n  -webkit-transition: background 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-radius 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n  transition: background 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-radius 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }\n  kypd-flex-key[data-kypd-key-status=\"start\"] {\n    border-radius: 2px;\n    background: #0077ff;\n    color: #ffffff; }\n";
 __$$styleInject(css$2);
 
 export default Keypad;
