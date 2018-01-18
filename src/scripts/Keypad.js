@@ -1,10 +1,11 @@
 export const defaultOptions = {
   el: null, // target element
+  input: null, // need to set value
   flex: true, // use flex layout
-  start: null, // touchstart|keydown callback
-  end: null, // touchend|keyup callback,
-  inject: document.body, // the wrap element to be injected keypad
-  render: null // manually render layout
+  mobile: true, // choose to use "touch" or "mouse" event
+  onstart: null, // touchstart|keydown callback
+  onend: null, // touchend|keyup callback,
+  inject: document.body // the wrap element to be injected keypad
 }
 
 export const defaultLayouts = {
@@ -18,17 +19,28 @@ export const defaultLayouts = {
 
 export default class Keypad {
   constructor (options = {}, layouts = {}) {
-    this.options = Object.assign(defaultOptions, options)
-    this.layouts = Object.assign(defaultLayouts, layouts)
+    this.options = Object.assign({}, defaultOptions, options)
+    this.layouts = Object.assign({}, defaultLayouts, layouts)
 
-    this.input = null
-    this.wrap = document.querySelector(this.prefix('elem', 'wrap'))
+    this.input = this.options['input']
+    this.inputValue = null
+    this.wrap = null
 
     const { el } = this.options
 
     if (el) this.listen(el)
 
     this.inject()
+  }
+
+  get events () {
+    const { mobile } = this.options
+
+    return {
+      start: mobile ? 'touchstart' : 'mousedown',
+      end: mobile ? 'touchend' : 'mouseup',
+      move: mobile ? 'touchmove' : 'mousemove'
+    }
   }
 
   prefix (type = 'elem', name = '') {
@@ -61,31 +73,52 @@ export default class Keypad {
 
         _key.setAttribute(this.prefix('attr', 'touch'), '')
 
-        _key.addEventListener('touchstart', ev => {
+        _key.addEventListener(this.events.start, ev => {
           ev.preventDefault()
           ev.stopPropagation()
 
           _key.setAttribute(this.prefix('attr', 'key-status'), 'start')
+
+          if (typeof this.options['onstart'] === 'function') {
+            const prevent = this.options['onstart'].call(this, [keyText, keyValue, keyCode])
+
+            if (prevent) return true
+          }
         }, false)
 
-        _key.addEventListener('touchend', ev => {
+        _key.addEventListener(this.events.end, ev => {
           ev.preventDefault()
           ev.stopPropagation()
 
           _key.setAttribute(this.prefix('attr', 'key-status'), '')
 
           const target = ev.currentTarget
+          const value = target.getAttribute(this.prefix('attr', 'key-value'))
           const code = target.getAttribute(this.prefix('attr', 'key-code'))
 
+          if (typeof this.options['onend'] === 'function') {
+            const prevent = this.options['onend'].call(this, [keyText, keyValue, keyCode])
+
+            if (prevent) return true
+          }
+
+          if (!this.input) return true
+
+          let v = this.input.value
+          let s = this.input.selectionStart
+
           if (this.input.value && code === 'backspace') {
-            this.input.value = this.input.value.slice(0, -1)
+            v = v.slice(0, s - 1) + v.slice(s)
+            s--
           }
 
-          const value = target.getAttribute(this.prefix('attr', 'key-value'))
-
-          if (this.input && value) {
-            this.input.value += value
+          if (value) {
+            v = v.slice(0, s) + value + v.slice(s)
+            s++
           }
+
+          this.input.value = v
+          this.input.selectionEnd = s
         }, false)
 
         _keyRow.appendChild(_key)
@@ -157,8 +190,20 @@ export default class Keypad {
     })
   }
 
-  focus () {
-    console.log('has focused.')
+  show () {
+    this.wrap.setAttribute(this.prefix('attr', 'status'), 'active')
+  }
+
+  hide () {
+    this.wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
+  }
+
+  toggle () {
+    if (this.wrap.getAttribute(this.prefix('attr', 'status')) === 'active') {
+      this.hide()
+    } else {
+      this.show()
+    }
   }
 
   static istype (o, type) {
