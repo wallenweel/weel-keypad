@@ -100,13 +100,23 @@ document.querySelector('button.js-hide-keypad').addEventListener('click', functi
 // demo 3
 var keypad3 = new Keypad({
   mobile: isMobile,
-  onstart: function onstart(_ref) {
+  show: false,
+  name: 'qwer',
+  reducer: {
+    key: function key(target) {
+      if (target.textContent === 'Space') {
+        target.textContent = '空 格';
+      }
+      return target;
+    }
+  },
+  onstart: function onstart(_ref, ev) {
     var _ref2 = slicedToArray(_ref, 3),
         text = _ref2[0],
         value = _ref2[1],
         code = _ref2[2];
 
-    console.log('start', text, value, code);
+    console.log(this, ev);
   },
   onend: function onend(_ref3) {
     var _ref4 = slicedToArray(_ref3, 3),
@@ -114,9 +124,9 @@ var keypad3 = new Keypad({
         value = _ref4[1],
         code = _ref4[2];
 
-    console.log('end', text, value, code);
+    console.log(text, value, code);
 
-    document.querySelector('.js-toggle-keypad2-v').textContent = text;
+    document.querySelector('.js-toggle-keypad2-v').textContent = value;
   }
 });
 
@@ -132,7 +142,7 @@ var keypad4 = new Keypad({
     var _ref6 = slicedToArray(_ref5, 3),
         code = _ref6[2];
 
-    var i = this.input.value.length;
+    var i = document.querySelector('input.js-readonly-input').value.length;
     var items = document.querySelectorAll('.js-show-keypad-password > i');
 
     if (code === 'backspace') {
