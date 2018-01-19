@@ -1,4 +1,4 @@
-import './src/styles/page.scss'
+import './src/styles/demo.scss'
 
 const isMobile = /Mobile/.test(navigator.userAgent)
 
@@ -29,13 +29,23 @@ document.querySelector('button.js-hide-keypad')
 // demo 3
 const keypad3 = new Keypad({
   mobile: isMobile,
-  onstart ([text, value, code]) {
-    console.log('start', text, value, code)
+  show: false,
+  name: 'qwer',
+  reducer: {
+    key (target) {
+      if (target.textContent === 'Space') {
+        target.textContent = '空 格'
+      }
+      return target
+    }
+  },
+  onstart ([text, value, code], ev) {
+    console.log(this, ev)
   },
   onend ([text, value, code]) {
-    console.log('end', text, value, code)
+    console.log(text, value, code)
 
-    document.querySelector('.js-toggle-keypad2-v').textContent = text
+    document.querySelector('.js-toggle-keypad2-v').textContent = value
   }
 })
 
@@ -47,7 +57,7 @@ const keypad4 = new Keypad({
   input: document.querySelector('input.js-readonly-input'),
   mobile: isMobile,
   onend ([, , code]) {
-    const i = this.input.value.length
+    const i = document.querySelector('input.js-readonly-input').value.length
     const items = document.querySelectorAll('.js-show-keypad-password > i')
 
     if (code === 'backspace') {

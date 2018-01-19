@@ -1,28 +1,41 @@
 kypd- {
   &wrap, &flex-wrap {
-    background: #ffffff;
+    background-color: #ffffff;
   }
 }
 
 kypd-flex- {
   &container {
+    background-color: inherit;
     border-top: 1px #f5f5f5 solid;
+
+    &[data-kypd-locked="upper"] {
+      [data-kypd-key-code="upper"] {
+        border-radius: 2px;
+        background-color: #0077ff;
+        color: #ffffff;
+      }
+    }
   }
 
   &key {
     cursor: default;
     border-radius: 10px;
-    background: #ffffff;
+    background-color: #ffffff;
     color: #0077ff;
     font-size: 16px;
-    transition: background .25s cubic-bezier(0.075, 0.82, 0.165, 1),
+    transition: background-color .25s cubic-bezier(0.075, 0.82, 0.165, 1),
                 color .25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                 border-radius .45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
-    &[data-kypd-key-status="start"] {
+    &[data-kypd-status="start"] {
       border-radius: 2px;
-      background: #0077ff;
+      background-color: #0077ff;
       color: #ffffff;
+    }
+
+    &[data-kypd-key-value=" "] {
+      min-width: 50%;
     }
   }
 }
