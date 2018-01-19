@@ -1,6 +1,6 @@
 {
   "name": "weel-keypad",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A Virtual Number Keypad.",
   "main": "index.js",
   "scripts": {
@@ -37,6 +37,7 @@
     "rollup-plugin-eslint": "^4.0.0",
     "rollup-plugin-node-resolve": "^3.0.2",
     "rollup-plugin-postcss": "^1.2.5",
+    "rollup-plugin-svg": "^1.0.1",
     "rollup-plugin-uglify": "^2.0.1",
     "rollup-watch-fix": "^0.0.3",
     "uglify-es": "^3.3.7"
