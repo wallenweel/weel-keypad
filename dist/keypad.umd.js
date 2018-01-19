@@ -518,7 +518,8 @@ var Keypad = function () {
         s--;
       }
 
-      if (value) {
+      var type = Keypad.istype(value);
+      if (type !== 'null' && type !== 'undefined') {
         v = v.slice(0, s) + value + v.slice(s);
         s++;
       }
