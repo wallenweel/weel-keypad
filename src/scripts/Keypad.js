@@ -1,3 +1,5 @@
+import { number, qwer } from '../layouts'
+
 export const defaultOptions = {
   el: null, // target element
   input: null, // need to set value
@@ -5,16 +7,16 @@ export const defaultOptions = {
   mobile: true, // choose to use "touch" or "mouse" event
   onstart: null, // touchstart|keydown callback
   onend: null, // touchend|keyup callback,
+  show: false,
+  name: 'number',
+  multiple: true,
+  render: null,
   inject: document.body // the wrap element to be injected keypad
 }
 
 export const defaultLayouts = {
-  numberPad: [
-    [[7], [8], [9]],
-    [[4], [5], [6]],
-    [[1], [2], [3]],
-    [['Delete', null, 'backspace'], [0], ['·', '.']]
-  ]
+  number,
+  qwer
 }
 
 export default class Keypad {
@@ -23,14 +25,16 @@ export default class Keypad {
     this.layouts = Object.assign({}, defaultLayouts, layouts)
 
     this.input = this.options['input']
-    this.inputValue = null
     this.wrap = null
+    this.keypads = {}
 
-    const { el } = this.options
+    const { el, show } = this.options
 
     if (el) this.listen(el)
 
     this.inject()
+
+    if (show) this.show()
   }
 
   get events () {
@@ -137,13 +141,19 @@ export default class Keypad {
     wrap.setAttribute(this.prefix('attr', 'status'), 'none')
 
     for (const [name, layout] of Object.entries(this.layouts)) {
-      const content = this.generator(layout)
+      const _container = container.cloneNode()
+      const _content = this.generator(layout)
 
-      content.setAttribute(this.prefix('attr', 'name'), name)
-      container.appendChild(content)
+      _content.setAttribute(this.prefix('attr', 'name'), name)
+      _container.setAttribute(this.prefix('attr', 'name'), name)
+      _container.setAttribute(this.prefix('attr', 'status'), 'ready')
+
+      this.keypads[name] = _container
+
+      _container.appendChild(_content)
+      wrap.appendChild(_container)
     }
 
-    wrap.appendChild(container)
     wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
 
     this.wrap = wrap
@@ -190,19 +200,31 @@ export default class Keypad {
     })
   }
 
-  show () {
+  show (name = this.options['name']) {
+    if (!this.layouts[name]) {
+      console.error(`Has not a keypad layout named "${name}"`)
+      return false
+    }
+
     this.wrap.setAttribute(this.prefix('attr', 'status'), 'active')
+    this.keypads[name].setAttribute(this.prefix('attr', 'status'), 'active')
   }
 
-  hide () {
+  hide (name = this.options['name']) {
+    if (!this.layouts[name]) {
+      console.error(`Has not a keypad layout named "${name}"`)
+      return false
+    }
+
     this.wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
+    this.keypads[name].setAttribute(this.prefix('attr', 'status'), 'ready')
   }
 
-  toggle () {
+  toggle (name = this.options['name']) {
     if (this.wrap.getAttribute(this.prefix('attr', 'status')) === 'active') {
-      this.hide()
+      this.hide(name)
     } else {
-      this.show()
+      this.show(name)
     }
   }
 

@@ -1,4 +1,4 @@
-import './src/styles/page.scss'
+import './src/styles/demo.scss'
 
 const isMobile = /Mobile/.test(navigator.userAgent)
 
@@ -29,6 +29,8 @@ document.querySelector('button.js-hide-keypad')
 // demo 3
 const keypad3 = new Keypad({
   mobile: isMobile,
+  show: true,
+  name: 'qwer',
   onstart ([text, value, code]) {
     console.log('start', text, value, code)
   },

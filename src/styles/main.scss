@@ -29,23 +29,50 @@ kypd- {
   }
 }
 
-kypd-flex- {
+$prefix: 'kypd-flex-';
+
+#{$prefix} {
   &container {
     width: inherit;
 
     justify-content: center;
+    flex-direction: column;
+    align-items: center;
     display: flex;
+
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+
+    &[data-kypd-status="ready"] {
+      transform: translateY(100%);
+
+      transition: transform .25s cubic-bezier(0.215, 0.610, 0.355, 1);
+    }
+    
+    &[data-kypd-status="active"] {
+      transform: translateY(0);
+    }
+    
+    &[data-kypd-name="number"] {
+      #{$prefix}content {
+        max-width: 240px;
+      }
+    }
+    
+    &[data-kypd-name="qwer"] {
+      #{$prefix}content {
+        max-width: 560px;      
+      }
+    }
   }
   
   &content {
+    width: 100%;
     align-items: center;
     flex-direction: column;
     display: flex;
-
-    &[data-kypd-name="numberPad"] {
-      width: 100%;
-      max-width: 240px;
-    }
   }
 
   &key-row {
