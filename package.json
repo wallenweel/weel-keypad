@@ -6,8 +6,8 @@
   "scripts": {
     "postinstall": "rollup-watch-fix",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run dev",
-    "dev": "rollup -c --environment NODE_ENV:development -m -w",
+    "start": "npm run bundle -- -w",
+    "bundle": "rollup -c --environment NODE_ENV:development -m",
     "build": "rollup -c --environment NODE_ENV:production"
   },
   "author": "wallen",

@@ -9,6 +9,13 @@
 pre-Alpha --> Alpha ✔ --> Beta
 
 
+## 截图预览
+
+![数字键盘](screenshots/number.png)
+![QWER 键盘](screenshots/qwer.png)
+![深色主题](screenshots/qwer_dark.png)
+
+
 ## 特性清单
 
 - [x] 数字键盘布局
@@ -78,6 +85,12 @@ export const defaultOptions = {
     row: null,
     key: null
   },
+
+  // 自定义主题名称，kypd-<flex|float>wrap[data-kypd-theme=""default]
+  theme: 'default',
+  
+  // 暗色主题开关，kypd-<flex|float>wrap[data-kypd-dark=""false]
+  dark: false,
 
   // 使用 appendChild 方法注入键盘的位置，默认为 body
   inject: document.body
@@ -164,8 +177,11 @@ yarn
 # 或者
 npm install
 
-# 启动项目开发环境
+# 启动项目开发环境并监听源文件
 npm start
+
+# 开发时打包
+npm run bundle
 
 # 发布时打包
 npm run build
