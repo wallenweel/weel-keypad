@@ -1,16 +1,17 @@
-kypd- {
-  &wrap, &flex-wrap {
+@import "../variables";
+
+#{$flex}, #{$float} {
+  &wrap {
     background-color: #ffffff;
   }
-}
 
-kypd-flex- {
   &container {
     background-color: inherit;
     border-top: 1px #f5f5f5 solid;
+    padding: 8px 0;
 
-    &[data-kypd-locked="upper"] {
-      [data-kypd-key-code="upper"] {
+    &[#{$data}locked="upper"] {
+      [#{$data}key-code="upper"] {
         border-radius: 2px;
         background-color: #0077ff;
         color: #ffffff;
@@ -20,22 +21,58 @@ kypd-flex- {
 
   &key {
     cursor: default;
-    border-radius: 10px;
+
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(73, 158, 255, 0.431);
+    margin: 2px;
+    font-size: 16px;
+
     background-color: #ffffff;
     color: #0077ff;
-    font-size: 16px;
+
     transition: background-color .25s cubic-bezier(0.075, 0.82, 0.165, 1),
-                color .25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                border-radius .45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                color .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
-    &[data-kypd-status="start"] {
-      border-radius: 2px;
+    &[#{$data}status="start"] {
       background-color: #0077ff;
       color: #ffffff;
     }
 
-    &[data-kypd-key-value=" "] {
-      min-width: 50%;
+    &[#{$data}key-code="enter"] {
+      border-radius: 8px;
+      background-color: #0077ff;
+      color: #ffffff;
+    }
+  }
+}
+
+#{$flex} {
+  &container {
+    &[#{$data}name="number"] {
+      #{$flex}key {
+        width: 0;
+        
+        &[#{$data}key-code="backspace"],
+        &[#{$data}key-value="0"] {
+          flex-grow: 2;
+        }
+      }
+    }
+
+    &[#{$data}name="qwer"] {
+      #{$flex}key {
+        width: 0;
+    
+        &[#{$data}key-value=" "] {
+          flex-grow: 6;
+        }
+        
+        &[#{$data}key-code="backspace"],
+        &[#{$data}key-code="enter"],
+        &[#{$data}key-code="@@number"] {
+          flex-grow: 2;
+        }
+      }
     }
   }
 }

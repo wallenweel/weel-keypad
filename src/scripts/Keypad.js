@@ -211,20 +211,36 @@ export default class Keypad {
       keypad.setAttribute(attr, '')
     }
 
-    switch (code) {
-      case this.maps['upper']:
-        if (when === 'start') break
+    if (when === 'start' && code === this.maps['upper']) {
+      const attr = this.prefix('attr', 'locked')
 
-        const attr = this.prefix('attr', 'locked')
-
-        if (this.locked) {
-          this.locked = null
-          keypad.removeAttribute(attr)
-          break
-        }
+      if (this.locked) {
+        this.locked = null
+        keypad.removeAttribute(attr)
+      } else {
         this.locked = code
         keypad.setAttribute(attr, code)
-        break
+      }
+    }
+
+    if (when === 'end' && /^@@/.test(code)) {
+      const name = code.match(/^@@(.*)/)[1]
+
+      this.hide()
+
+      const layouts = Object.keys(this.layouts)
+
+      if (typeof name === 'string' && !name.length) {
+        let next = layouts.indexOf(this.options['name']) + 1
+
+        this.options['name'] = layouts[next === layouts.length ? 0 : next]
+      }
+
+      if (layouts.includes(name)) {
+        this.options['name'] = name
+      }
+
+      this.show()
     }
   }
 

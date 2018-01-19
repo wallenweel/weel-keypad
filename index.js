@@ -29,8 +29,8 @@ document.querySelector('button.js-hide-keypad')
 // demo 3
 const keypad3 = new Keypad({
   mobile: isMobile,
-  show: false,
-  name: 'qwer',
+  show: true,
+  // name: 'qwer',
   reducer: {
     key (target) {
       if (target.textContent === 'Space') {
