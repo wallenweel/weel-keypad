@@ -63,7 +63,7 @@ $prefix: 'kypd-flex-';
     
     &[data-kypd-name="qwer"] {
       #{$prefix}content {
-        max-width: 560px;      
+        max-width: 560px;
       }
     }
   }
@@ -78,6 +78,7 @@ $prefix: 'kypd-flex-';
   &key-row {
     width: 100%;
     justify-content: space-between;
+    align-items: center;
     display: flex;
   }
 

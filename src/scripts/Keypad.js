@@ -3,14 +3,27 @@ import { number, qwer } from '../layouts'
 export const defaultOptions = {
   el: null, // target element
   input: null, // need to set value
+  inputWhen: 'end',
+
   flex: true, // use flex layout
   mobile: true, // choose to use "touch" or "mouse" event
+
   onstart: null, // touchstart|keydown callback
   onend: null, // touchend|keyup callback,
-  show: false,
+
   name: 'number',
+  show: false,
   multiple: true,
+
   render: null,
+  reducer: {
+    wrap: null,
+    container: null,
+    content: null,
+    row: null,
+    key: null
+  },
+
   inject: document.body // the wrap element to be injected keypad
 }
 
@@ -19,14 +32,24 @@ export const defaultLayouts = {
   qwer
 }
 
+export const defaultMaps = {
+  upper: 'upper',
+  ctrl: 'ctrl',
+  alt: 'alt',
+  shift: 'shift'
+}
+
 export default class Keypad {
-  constructor (options = {}, layouts = {}) {
+  constructor (options = {}, layouts = {}, maps = {}) {
     this.options = Object.assign({}, defaultOptions, options)
     this.layouts = Object.assign({}, defaultLayouts, layouts)
+    this.maps = Object.assign({}, defaultMaps, maps)
 
     this.input = this.options['input']
     this.wrap = null
     this.keypads = {}
+    this.hightlight = null
+    this.locked = null
 
     const { el, show } = this.options
 
@@ -56,113 +79,192 @@ export default class Keypad {
     }[type]
   }
 
+  reducer (name) {
+    if (!Keypad.istype(this.options['reducer'], 'object')) {
+      console.error('"reducer" must to be a plain object.')
+      return
+    }
+
+    if (typeof this.options['reducer'][name] === 'function') {
+      return target => this.options['reducer'][name].call(this, target)
+    }
+
+    return target => target
+  }
+
   generator (layout) {
     const content = document.createElement(this.prefix('elem', 'content'))
     const key = document.createElement(this.prefix('elem', 'key'))
     const keyRow = document.createElement(this.prefix('elem', 'key-row'))
 
+    const rowReducer = this.reducer('row')
+    const keyReducer = this.reducer('key')
+
     for (const group of layout) {
       const _keyRow = keyRow.cloneNode()
 
-      for (const [keyText, keyValue, keyCode] of group) {
+      for (let [keyText, keyValue, keyCode] of group) {
         const _key = key.cloneNode()
 
         _key.textContent = keyText
 
-        if (keyCode) _key.setAttribute(this.prefix('attr', 'key-code'), keyCode)
-
         if (keyValue || (!keyValue && !keyCode)) {
+          keyValue = keyValue || keyText
           _key.setAttribute(this.prefix('attr', 'key-value'), keyValue || keyText)
         }
 
-        _key.setAttribute(this.prefix('attr', 'touch'), '')
+        if (keyCode) _key.setAttribute(this.prefix('attr', 'key-code'), keyCode)
 
-        _key.addEventListener(this.events.start, ev => {
-          ev.preventDefault()
-          ev.stopPropagation()
+        _key.setAttribute(this.prefix('attr', 'status'), '')
 
-          _key.setAttribute(this.prefix('attr', 'key-status'), 'start')
+        _key.addEventListener(this.events.start,
+          ev => this.handleKey(ev, 'start', [keyText, keyValue, keyCode]),
+          false
+        )
 
-          if (typeof this.options['onstart'] === 'function') {
-            const prevent = this.options['onstart'].call(this, [keyText, keyValue, keyCode])
+        _key.addEventListener(this.events.end,
+          ev => this.handleKey(ev, 'end', [keyText, keyValue, keyCode]),
+          false
+        )
 
-            if (prevent) return true
-          }
-        }, false)
-
-        _key.addEventListener(this.events.end, ev => {
-          ev.preventDefault()
-          ev.stopPropagation()
-
-          _key.setAttribute(this.prefix('attr', 'key-status'), '')
-
-          const target = ev.currentTarget
-          const value = target.getAttribute(this.prefix('attr', 'key-value'))
-          const code = target.getAttribute(this.prefix('attr', 'key-code'))
-
-          if (typeof this.options['onend'] === 'function') {
-            const prevent = this.options['onend'].call(this, [keyText, keyValue, keyCode])
-
-            if (prevent) return true
-          }
-
-          if (!this.input) return true
-
-          let v = this.input.value
-          let s = this.input.selectionStart
-
-          if (this.input.value && code === 'backspace') {
-            v = v.slice(0, s - 1) + v.slice(s)
-            s--
-          }
-
-          if (value) {
-            v = v.slice(0, s) + value + v.slice(s)
-            s++
-          }
-
-          this.input.value = v
-          this.input.selectionEnd = s
-        }, false)
-
-        _keyRow.appendChild(_key)
+        _keyRow.appendChild(keyReducer(_key))
       }
 
-      content.appendChild(_keyRow)
+      content.appendChild(rowReducer(_keyRow))
     }
 
     return content
   }
 
+  handleKey (ev, when, [keyText, keyValue, keyCode]) {
+    ev.preventDefault()
+    ev.stopPropagation()
+
+    const target = ev.currentTarget
+    const attr = this.prefix('attr', 'status')
+    const status = target.getAttribute(attr)
+
+    if (status !== 'active') {
+      if (when === 'start') {
+        target.setAttribute(attr, 'start')
+      }
+
+      if (when === 'end') {
+        target.setAttribute(attr, '')
+      }
+    }
+
+    if (!keyCode && this.locked === this.maps['upper']) {
+      keyText = keyText && keyText.toUpperCase()
+      keyValue = keyValue && keyValue.toUpperCase()
+    }
+
+    this.keyMap(when, keyValue, keyCode)
+
+    if (typeof this.options[`on${when}`] === 'function') {
+      const prevent = this.options[`on${when}`].call(target, [keyText, keyValue, keyCode], ev)
+
+      if (prevent) return true
+    }
+
+    if (when === this.options['inputWhen']) {
+      this.keyInput(keyValue, keyCode)
+    }
+  }
+
+  keyMap (when, value, code) {
+    const keypad = this.keypads[this.options['name']]
+
+    const attr = this.prefix('attr', 'hightlight')
+    let hightlight = keypad.getAttribute('hightlight') || ''
+
+    hightlight = hightlight ? `${hightlight}+${code || value}` : (code || value)
+
+    if (when === 'start') {
+      this.hightlight = hightlight
+      keypad.setAttribute(attr, hightlight)
+    }
+
+    if (when === 'end') {
+      keypad.setAttribute(attr, '')
+    }
+
+    switch (code) {
+      case this.maps['upper']:
+        if (when === 'start') break
+
+        const attr = this.prefix('attr', 'locked')
+
+        if (this.locked) {
+          this.locked = null
+          keypad.removeAttribute(attr)
+          break
+        }
+        this.locked = code
+        keypad.setAttribute(attr, code)
+        break
+    }
+  }
+
+  keyInput (value, code) {
+    if (!this.input) return true
+
+    let v = this.input.value
+    let s = this.input.selectionStart
+
+    if (v && code === 'backspace') {
+      v = v.slice(0, s - 1) + v.slice(s)
+      s--
+    }
+
+    if (value) {
+      v = v.slice(0, s) + value + v.slice(s)
+      s++
+    }
+
+    this.input.value = v
+    this.input.selectionEnd = s
+  }
+
   render (layouts = this.layouts) {
+    if (typeof this.options['render'] === 'function') {
+      return this.options['render'].call(this)
+    }
+
     const wrap = document.createElement(this.prefix('elem', 'wrap'))
     const container = document.createElement(this.prefix('elem', 'container'))
 
     wrap.setAttribute(this.prefix('attr', 'status'), 'none')
 
-    for (const [name, layout] of Object.entries(this.layouts)) {
-      const _container = container.cloneNode()
-      const _content = this.generator(layout)
+    const contentReducer = this.reducer('content')
+    const containerReducer = this.reducer('container')
 
-      _content.setAttribute(this.prefix('attr', 'name'), name)
+    for (const [name, layout] of Object.entries(layouts)) {
+      const _content = this.generator(layout)
+      const _container = container.cloneNode()
+
       _container.setAttribute(this.prefix('attr', 'name'), name)
       _container.setAttribute(this.prefix('attr', 'status'), 'ready')
 
       this.keypads[name] = _container
 
-      _container.appendChild(_content)
-      wrap.appendChild(_container)
+      _container.appendChild(contentReducer(_content))
+      wrap.appendChild(containerReducer(_container))
     }
 
     wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
 
-    this.wrap = wrap
+    this.wrap = this.reducer('wrap')(wrap)
 
-    return wrap
+    return this.wrap
   }
 
   inject (target = this.options['inject']) {
-    target.appendChild(this.render())
+    target.appendChild(this.render(
+      this.options['multiple']
+        ? this.layouts
+        : { [this.options['name']]: this.layouts[this.options['name']] }
+    ))
   }
 
   listen (el = null) {
@@ -190,12 +292,13 @@ export default class Keypad {
 
     Array.prototype.forEach.call(targets, target => {
       target.addEventListener('focus', ev => {
-        this.wrap.setAttribute(this.prefix('attr', 'status'), 'active')
         this.input = ev.currentTarget
+        this.show()
       }, false)
 
       target.addEventListener('blur', ev => {
-        this.wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
+        this.input = null
+        this.hide()
       }, false)
     })
   }

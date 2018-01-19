@@ -12,7 +12,8 @@ pre-Alpha ✔ --> Alpha --> Beta
 ## 特性清单
 
 - [x] 数字键盘布局
-- [ ] 自定义键盘布局
+- [x] 自定义键盘布局
+- [x] 通过钩子自定义 Dom 元素
 - [ ] 明暗两色主题
 - [x] 分离布局（Layout）与主题样式（Theme）
 - [x] 基于选项的配置
@@ -21,6 +22,7 @@ pre-Alpha ✔ --> Alpha --> Beta
 - [x] 响应正常的可编辑元素（input、div[contenteditable]）
 - [x] 按需叫出键盘
 - [x] 支持桌面端鼠标事件
+- [ ] 支持 SVG 图片作为按键
 
 
 ## 使用 & 选项说明
@@ -45,10 +47,34 @@ pre-Alpha ✔ --> Alpha --> Beta
   // 默认 true 使用 touch 相关事件，false 使用 mouse 相关事件
   mobile: true,
 
-  // 按键按下时触发回调函数，第一个参数为按键数据 [text, value, code]
-  onstart: null,
-  // 按键放开时触发回调函数，参数同上
-  onend: null, 
+  // 按键按下时触发回调函数
+  onstart: null, // 数组参数： [text, value, code]
+
+  // 按键放开时触发回调函数
+  onend: null,  // 参数同上
+
+  // true 为载入后立即显示
+  show: false,
+
+  // 默认显示的键盘布局，默认数字键盘
+  name: 'number', // 可用值：number, qwer
+
+  // 是否渲染多键盘，false 为只渲染 “name” 指定的键盘
+  multiple: true,
+
+  // 替换程序的渲染方法
+  render: null, // 实验特性
+
+  // 个部分元素渲染时应用钩子
+  // 参数：target（目标元素），this 为当前 Keypad 实例
+  // 提示：定义 target 后必须 return target 以继续完整的渲染
+  reducer: {
+    wrap: null,
+    container: null,
+    content: null,
+    row: null,
+    key: null
+  },
 
   // 使用 appendChild 方法注入键盘的位置，默认为 body
   inject: document.body

@@ -8,6 +8,14 @@ kypd-flex- {
   &container {
     background: inherit;
     border-top: 1px #f5f5f5 solid;
+
+    &[data-kypd-locked="upper"] {
+      [data-kypd-key-code="upper"] {
+        border-radius: 2px;
+        background: #0077ff;
+        color: #ffffff;
+      }
+    }
   }
 
   &key {
@@ -20,10 +28,14 @@ kypd-flex- {
                 color .25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                 border-radius .45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
-    &[data-kypd-key-status="start"] {
+    &[data-kypd-status="start"] {
       border-radius: 2px;
       background: #0077ff;
       color: #ffffff;
+    }
+
+    &[data-kypd-key-value=" "] {
+      min-width: 50%;
     }
   }
 }
