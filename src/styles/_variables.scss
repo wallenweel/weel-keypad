@@ -1,16 +1,6 @@
-@mixin init {
-  html,
-  body {
-    box-sizing: border-box;
-  }
+// prefixs
+$float: 'kypd-';
+$flex: 'kypd-flex-';
+$data: 'data-kypd-';
 
-  *,
-  *::before,
-  *::after {
-    box-sizing: inherit;
-  }
-
-  html {
-    font-size: 100%;
-  }
-}
+$primary-light: #0077ff;

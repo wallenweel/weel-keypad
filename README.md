@@ -9,12 +9,19 @@
 pre-Alpha --> Alpha ✔ --> Beta
 
 
+## 截图预览
+
+![数字键盘](screenshots/number.png)
+![QWER 键盘](screenshots/qwer.png)
+![深色主题](screenshots/qwer_dark.png)
+
+
 ## 特性清单
 
 - [x] 数字键盘布局
 - [x] 自定义键盘布局
 - [x] 通过钩子自定义 Dom 元素
-- [ ] 明暗两色默认主题
+- [x] 明暗两色默认主题
 - [x] 分离布局（Layout）与主题样式（Theme）
 - [x] 基于选项的配置
 - [ ] 添加定制化的工具条
@@ -24,6 +31,7 @@ pre-Alpha --> Alpha ✔ --> Beta
 - [x] 按需叫出键盘
 - [x] 支持桌面端鼠标事件
 - [x] 支持 SVG 图片作为按键
+- [x] 支持键盘切换
 
 
 ## 使用 & 选项说明
@@ -77,6 +85,12 @@ export const defaultOptions = {
     row: null,
     key: null
   },
+
+  // 自定义主题名称，kypd-<flex|float>wrap[data-kypd-theme=""default]
+  theme: 'default',
+  
+  // 暗色主题开关，kypd-<flex|float>wrap[data-kypd-dark=""false]
+  dark: false,
 
   // 使用 appendChild 方法注入键盘的位置，默认为 body
   inject: document.body
@@ -134,6 +148,12 @@ export const qwer = [
   null, // 没有值的话使用 null 来忽略
   'backspace' // 自定义键码，程序内置了几个（见 maps 部分），也可自定义设置
 ]
+
+// 切换到键盘
+// @@+键盘布局 name
+// 只有 @@ 的话则循环切换下一个
+['123', null, '@@number']
+
 ```
 
 ### 自定义键映射 `maps`
@@ -157,8 +177,11 @@ yarn
 # 或者
 npm install
 
-# 启动项目开发环境
+# 启动项目开发环境并监听源文件
 npm start
+
+# 开发时打包
+npm run bundle
 
 # 发布时打包
 npm run build

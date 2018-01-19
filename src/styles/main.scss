@@ -1,7 +1,4 @@
-// prefixs
-$float: 'kypd-';
-$flex: 'kypd-flex-';
-$data: 'data-kypd-';
+@import "variables";
 
 // common
 #{$flex}, #{$float} {
@@ -107,5 +104,7 @@ $data: 'data-kypd-';
     align-items: center;
     justify-content: center;
     display: flex;
+
+    flex: auto;
   }
 }
