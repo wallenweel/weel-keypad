@@ -14,7 +14,7 @@ pre-Alpha --> Alpha ✔ --> Beta
 - [x] 数字键盘布局
 - [x] 自定义键盘布局
 - [x] 通过钩子自定义 Dom 元素
-- [ ] 明暗两色主题
+- [ ] 明暗两色默认主题
 - [x] 分离布局（Layout）与主题样式（Theme）
 - [x] 基于选项的配置
 - [ ] 添加定制化的工具条
@@ -23,7 +23,7 @@ pre-Alpha --> Alpha ✔ --> Beta
 - [x] 响应正常的可编辑元素（input、div[contenteditable]）
 - [x] 按需叫出键盘
 - [x] 支持桌面端鼠标事件
-- [ ] 支持 SVG 图片作为按键
+- [x] 支持 SVG 图片作为按键
 
 
 ## 使用 & 选项说明
@@ -87,9 +87,16 @@ export const defaultOptions = {
 
 > 键盘布局使用三维数组实现，可以很直观的创建自由度很高的布局。
 
+#### 说明
+
 1. 第一层为布局容器
 2. 第二层为每一行按键的容器
-3. 第三层为定义的按键 `text, [, value, code]`
+3. 第三层为定义的按键 `[text, [, value, code]]`
+
+#### 使用 SVG
+
+1. 设置 `text` 为形如 `<svg ...><path d="..."></path></svg>` 的 SVG 字符串
+2. 通过 `svg[name]` 使用 **[内置的 SVGs](src/images/index.js)**
 
 ```javascript
 /**
@@ -101,7 +108,7 @@ export const number = [
   [[7], [8], [9]],
   [[4], [5], [6]],
   [[1], [2], [3]],
-  [['Delete', null, 'backspace'], [0], ['·', '.']]
+  [['svg[backspace]', null, 'backspace'], [0], ['·', '.']]
 ]
 
 // 简略版的 QWER 键盘
@@ -109,7 +116,7 @@ export const qwer = [
   [['q'], ['w'], ['e'], ['r'], ['t'], ['y'], ['u'], ['i'], ['o'], ['p']],
   [['a'], ['s'], ['d'], ['f'], ['g'], ['h'], ['j'], ['k'], ['l']],
   [['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m']],
-  [['^', null, 'upper'], ['space', ' '], [','], ['.']]
+  [['svg[upper]', null, 'upper'], ['Space', ' '], [','], ['.'], ['svg[backspace]', null, 'backspace']]
 ]
 
 // 单个普通按键 “0”
