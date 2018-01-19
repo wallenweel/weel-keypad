@@ -239,7 +239,8 @@ export default class Keypad {
       s--
     }
 
-    if (value) {
+    const type = Keypad.istype(value)
+    if (type !== 'null' && type !== 'undefined') {
       v = v.slice(0, s) + value + v.slice(s)
       s++
     }
