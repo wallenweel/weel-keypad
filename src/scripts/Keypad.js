@@ -26,6 +26,9 @@ export const defaultOptions = {
     key: null
   },
 
+  theme: 'default',
+  dark: false,
+
   inject: document.body // the wrap element to be injected keypad
 }
 
@@ -292,6 +295,8 @@ export default class Keypad {
     }
 
     wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
+    wrap.setAttribute(this.prefix('attr', 'theme'), this.options['theme'])
+    wrap.setAttribute(this.prefix('attr', 'dark'), this.options['dark'])
 
     this.wrap = this.reducer('wrap')(wrap)
 
