@@ -1,3 +1,5 @@
+import * as images from '../images'
+
 import { number, qwer } from '../layouts'
 
 export const defaultOptions = {
@@ -106,7 +108,27 @@ export default class Keypad {
       for (let [keyText, keyValue, keyCode] of group) {
         const _key = key.cloneNode()
 
-        _key.textContent = keyText
+        if (/svg\[.+\]/.test(keyText)) {
+          const name = keyText.match(/svg\[(.+)\]/)[1]
+          const svg = images[name]
+
+          if (!svg) {
+            console.wran(`No image is named "${name}"`)
+            break
+          }
+
+          const fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div')
+          fake.innerHTML = svg
+
+          _key.appendChild(fake.querySelector('svg'))
+        } else if (/(<\/svg>[\s]?)$/.test(keyText)) {
+          const fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div')
+          fake.innerHTML = keyText
+
+          _key.appendChild(fake.querySelector('svg'))
+        } else {
+          _key.textContent = keyText
+        }
 
         if (keyValue || (!keyValue && !keyCode)) {
           keyValue = keyValue || keyText

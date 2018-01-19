@@ -60,7 +60,8 @@ $data: 'data-kypd-';
   }
 
   &key {
-    &[#{$data}key-code="upper"] {
+    svg {
+      fill: currentColor;
     }
   }
 }
