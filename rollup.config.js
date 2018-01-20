@@ -1,4 +1,4 @@
-import resolve from 'rollup-plugin-node-resolve'
+import nodeResolve from 'rollup-plugin-node-resolve'
 import eslint from 'rollup-plugin-eslint'
 import babel from 'rollup-plugin-babel'
 
@@ -14,7 +14,10 @@ import cssnano from 'cssnano'
 const min = process.env.NODE_ENV === 'production' ? '.min' : ''
 
 const plugins = [
-  resolve(),
+  nodeResolve({
+    jsnext: true,
+    main: true
+  }),
   postcss({
     plugins: [
       simplevars(),
@@ -33,13 +36,13 @@ const plugins = [
 const bundle = {
   input: 'src/main.js',
   output: [{
-    file: `dist/keypad.cjs${min}.js`,
+    file: `dist/keypad.common${min}.js`,
     format: 'cjs'
   }, {
-    file: `dist/keypad.es${min}.js`,
+    file: `dist/keypad.esm${min}.js`,
     format: 'es'
   }, {
-    file: `dist/keypad.umd${min}.js`,
+    file: `dist/keypad${min}.js`,
     name: 'Keypad',
     format: 'umd'
   }],
@@ -50,7 +53,7 @@ const index = {
   input: './index.js',
   output: [{
     file: `dist/index${min}.js`,
-    format: 'cjs'
+    format: 'umd'
   }],
   plugins
 }
