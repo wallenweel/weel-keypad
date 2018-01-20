@@ -86,6 +86,9 @@ export const defaultOptions = {
     key: null
   },
 
+  // 替换 kypd-name 的自定义标签，会无效化所有的默认样式
+  tag: null,
+
   // 自定义主题名称，kypd-<flex|float>wrap[data-kypd-theme=""default]
   theme: 'default',
   
@@ -167,6 +170,13 @@ export const defaultMaps = {
   shift: 'shift'
 }
 ```
+
+## 接口方法
+
+```javascript
+
+```
+
 
 ## 构建项目
 

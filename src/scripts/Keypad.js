@@ -26,6 +26,7 @@ export const defaultOptions = {
     key: null
   },
 
+  tag: null,
   theme: 'default',
   dark: false,
 
@@ -84,6 +85,18 @@ export default class Keypad {
     }[type]
   }
 
+  createElement (name = '', tag = this.options['tag']) {
+    if (!tag) {
+      return document.createElement(this.prefix('elem', name))
+    }
+
+    const _elem = document.createElement(tag)
+
+    _elem.setAttribute(this.prefix('attr', 'tag'), name)
+
+    return _elem
+  }
+
   reducer (name) {
     if (!Keypad.istype(this.options['reducer'], 'object')) {
       console.error('"reducer" must to be a plain object.')
@@ -98,9 +111,9 @@ export default class Keypad {
   }
 
   generator (layout) {
-    const content = document.createElement(this.prefix('elem', 'content'))
-    const key = document.createElement(this.prefix('elem', 'key'))
-    const keyRow = document.createElement(this.prefix('elem', 'key-row'))
+    const content = this.createElement('content')
+    const key = this.createElement('key')
+    const keyRow = this.createElement('key-row')
 
     const rowReducer = this.reducer('row')
     const keyReducer = this.reducer('key')
@@ -273,8 +286,8 @@ export default class Keypad {
       return this.options['render'].call(this)
     }
 
-    const wrap = document.createElement(this.prefix('elem', 'wrap'))
-    const container = document.createElement(this.prefix('elem', 'container'))
+    const wrap = this.createElement('wrap')
+    const container = this.createElement('container')
 
     wrap.setAttribute(this.prefix('attr', 'status'), 'none')
 
