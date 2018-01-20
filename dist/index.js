@@ -1,4 +1,8 @@
-'use strict';
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(factory());
+}(this, (function () { 'use strict';
 
 function __$$styleInject(css, ref) {
   if ( ref === void 0 ) ref = {};
@@ -170,4 +174,6 @@ var keypad4 = new Keypad({
 document.querySelector('.js-show-keypad-password').addEventListener('click', function (ev) {
   keypad4.show();
 }, false);
+
+})));
 //# sourceMappingURL=index.js.map
