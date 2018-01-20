@@ -1,6 +1,12 @@
 language: node_js
+
 node_js:
   - "8"
+
+sudo: required
+
+addons:
+  chrome: stable
 
 cache:
   yarn: true
@@ -8,3 +14,5 @@ cache:
 script:
   - npm run bundle
   - npm run build
+  - npm test
+  - npm run report-coverage

@@ -1,2 +1,4 @@
-/dist/
+test/
+dist/
 *.svg
+karma.conf.*

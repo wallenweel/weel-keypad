@@ -2,8 +2,10 @@
 
 [![Build Status](https://nodei.co/npm/weel-keypad.png)](https://www.npmjs.com/weel-keypad)
 
-[![Build Status](https://travis-ci.org/wallenweel/weel-keypad.svg)](https://travis-ci.org/wallenweel/weel-keypad)
 [![Dependency Status](https://david-dm.org/wallenweel/weel-keypad.svg)](https://david-dm.org/wallenweel/weel-keypad)
+[![Build Status](https://travis-ci.org/wallenweel/weel-keypad.svg)](https://travis-ci.org/wallenweel/weel-keypad)
+[![codecov](https://codecov.io/gh/wallenweel/weel-keypad/branch/develop/graph/badge.svg)](https://codecov.io/gh/wallenweel/weel-keypad)
+
 
 优先移动端浏览器环境使用的虚拟键盘，在开箱即用的基础上支持高度定制化，按需可对所有 DOM 节点进行调整或重写，完全分离结构与样式，布局、展现方式及主题样式交由 CSS 实现。
 
@@ -226,4 +228,7 @@ npm run bundle
 
 # 发布时打包
 npm run build
+
+# 测试
+npm test
 ```
