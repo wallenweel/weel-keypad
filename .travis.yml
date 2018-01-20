@@ -5,9 +5,6 @@ node_js:
 cache:
   yarn: true
 
-before_install:
-  - npm install rollup-watch-fix -D
-
 script:
   - npm run bundle
   - npm run build

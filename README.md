@@ -1,4 +1,4 @@
-# Weel Keypad 虚拟软键盘
+# Weel Keypad [![Build Status](https://travis-ci.org/wallenweel/weel-keypad.svg?branch=develop)](https://travis-ci.org/wallenweel/weel-keypad)
 > 优先移动端浏览器环境使用的虚拟键盘，在开箱即用的基础上支持高度定制化，按需可对所有 DOM 节点进行调整或重写，完全分离结构与样式，布局、展现方式及主题样式交由 CSS 实现。
 
 **master** 分支中 `dist` 目录里的用于 [Demo](http://keypad.weel.xyz/) 的库文件可能不是最新的代码，建议克隆 **develop** 分支后手动构建文件。

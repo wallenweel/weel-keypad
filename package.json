@@ -4,9 +4,9 @@
   "description": "A Virtual Number Keypad.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "rollup-watch-fix",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run bundle -- -w",
+    "start": "npm run watch",
+    "watch": "rollup-watch-fix && npm run bundle -- -w",
     "bundle": "rollup -c --environment NODE_ENV:development -m",
     "build": "rollup -c --environment NODE_ENV:production"
   },
