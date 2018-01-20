@@ -27,8 +27,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/scripts/Keypad.js': ['coverage'],
-      'test/**/*.spec.js': ['rollup']
+      'test/**/*.spec.js': ['rollup', 'coverage']
     },
 
 
@@ -51,7 +50,8 @@ module.exports = function(config) {
         require('rollup-plugin-babel')({
           exclude: 'node_modules/**',
           plugins: ['external-helpers']
-        })
+        }),
+        require('rollup-plugin-istanbul')()
       ]
     },
 
@@ -64,10 +64,11 @@ module.exports = function(config) {
 
     coverageReporter: {
       reporters: [
-          // generates ./coverage/lcov.info
-          { type:'lcovonly', subdir: '.' },
-          // generates ./coverage/coverage-final.json
-          { type:'json', subdir: '.' },
+        { type:'html', dir : 'coverage/' },
+        // generates ./coverage/lcov.info
+        { type:'lcovonly', subdir: '.' },
+        // generates ./coverage/coverage-final.json
+        { type:'json', subdir: '.' },
       ]
     },
 
