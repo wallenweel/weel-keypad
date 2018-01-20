@@ -27,8 +27,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/scripts/Keypad.js': ['coverage'],
-      'test/**/*.spec.js': ['rollup']
+      'test/**/*.spec.js': ['rollup', 'coverage']
     },
 
 
@@ -51,7 +50,8 @@ module.exports = function(config) {
         require('rollup-plugin-babel')({
           exclude: 'node_modules/**',
           plugins: ['external-helpers']
-        })
+        }),
+        require('rollup-plugin-istanbul')()
       ]
     },
 
@@ -64,10 +64,11 @@ module.exports = function(config) {
 
     coverageReporter: {
       reporters: [
-          // generates ./coverage/lcov.info
-          { type:'lcovonly', subdir: '.' },
-          // generates ./coverage/coverage-final.json
-          { type:'json', subdir: '.' },
+        { type:'html', dir : 'coverage/' },
+        // generates ./coverage/lcov.info
+        { type:'lcovonly', subdir: '.' },
+        // generates ./coverage/coverage-final.json
+        { type:'json', subdir: '.' },
       ]
     },
 
@@ -91,12 +92,12 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessNoSandbox'],
+    browsers: ['Chrome'],
 
     // you can define custom flags
-    customLaunchers: {
-      ChromeHeadlessNoSandbox: {
-        base: 'ChromeHeadless',
+    customLaunchers: {  
+      Chrome_travis_ci: {
+        base: 'Chrome',
         flags: ['--no-sandbox']
       }
     },
@@ -104,10 +105,14 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: process.env.TRAVIS,
 
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity
   })
+
+  if(process.env.TRAVIS) {  
+    config.browsers = ['Chrome_travis_ci'];
+  }
 }
