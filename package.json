@@ -1,20 +1,38 @@
 {
   "name": "weel-keypad",
-  "version": "0.1.0",
-  "description": "A Virtual Number Keypad.",
-  "main": "index.js",
+  "version": "0.1.4",
+  "description": "A Mobile First Virtual Keypad For Browser Environment.",
+  "homepage": "http://keypad.weel.xyz",
+  "keywords": [
+    "keyboard",
+    "keypad",
+    "weel"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wallenweel/weel-keypad.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wallenweel/weel-keypad/issues"
+  },
+  "main": "dist/keypad.common.js",
+  "module": "dist/keypad.esm.js",
+  "unpkg": "dist/keypad.js",
+  "files": [
+    "src",
+    "dist/*.js",
+    "index.html"
+  ],
   "scripts": {
-    "postinstall": "rollup-watch-fix",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run bundle -- -w",
+    "start": "npm run watch",
+    "watch": "rollup-watch-fix && npm run bundle -- -w",
     "bundle": "rollup -c --environment NODE_ENV:development -m",
     "build": "rollup -c --environment NODE_ENV:production"
   },
   "author": "wallen",
   "license": "MIT",
-  "dependencies": {
-    "normalize.css": "^7.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",

@@ -5,10 +5,14 @@
   &wrap {
     width: 100%;
     font-family: Arial, Helvetica, sans-serif;
-    display: block;
+    
+    left: 0;
     bottom: 0;
+    right: 0;
     z-index: 999999999;
     position: fixed;
+
+    display: block;
   
     transition: opacity .35s,
                 visibility .35s,

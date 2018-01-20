@@ -11,7 +11,15 @@ import nested from 'postcss-nested'
 import cssnext from 'postcss-cssnext'
 import cssnano from 'cssnano'
 
+import manifest from './package.json'
+
 const min = process.env.NODE_ENV === 'production' ? '.min' : ''
+
+const banner = `/*!
+  * Weel Keypad v${manifest.version}
+  * (c) 2018 ${manifest.author}
+  * Released under the MIT License.
+  */`
 
 const plugins = [
   resolve(),
@@ -33,15 +41,18 @@ const plugins = [
 const bundle = {
   input: 'src/main.js',
   output: [{
-    file: `dist/keypad.cjs${min}.js`,
-    format: 'cjs'
+    file: `dist/keypad.common${min}.js`,
+    format: 'cjs',
+    banner
   }, {
-    file: `dist/keypad.es${min}.js`,
-    format: 'es'
+    file: `dist/keypad.esm${min}.js`,
+    format: 'es',
+    banner
   }, {
-    file: `dist/keypad.umd${min}.js`,
+    file: `dist/keypad${min}.js`,
     name: 'Keypad',
-    format: 'umd'
+    format: 'umd',
+    banner
   }],
   plugins
 }
@@ -50,7 +61,7 @@ const index = {
   input: './index.js',
   output: [{
     file: `dist/index${min}.js`,
-    format: 'cjs'
+    format: 'umd'
   }],
   plugins
 }
