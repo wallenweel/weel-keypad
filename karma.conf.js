@@ -91,12 +91,12 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessNoSandbox'],
+    browsers: ['Chrome'],
 
     // you can define custom flags
-    customLaunchers: {
-      ChromeHeadlessNoSandbox: {
-        base: 'ChromeHeadless',
+    customLaunchers: {  
+      Chrome_travis_ci: {
+        base: 'Chrome',
         flags: ['--no-sandbox']
       }
     },
@@ -110,4 +110,8 @@ module.exports = function(config) {
     // how many browser should be started simultaneous
     concurrency: Infinity
   })
+
+  if(process.env.TRAVIS) {  
+    config.browsers = ['Chrome_travis_ci'];
+  }
 }
