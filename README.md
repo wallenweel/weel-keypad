@@ -1,25 +1,31 @@
 # Weel Keypad
-[![Dependency Status](https://david-dm.org/wallenweel/weel-keypad.svg?theme=shields.io)](https://david-dm.org/wallenweel/weel-keypad)
-[![Build Status](https://travis-ci.org/wallenweel/weel-keypad.svg?branch=develop)](https://travis-ci.org/wallenweel/weel-keypad)
 
-> 优先移动端浏览器环境使用的虚拟键盘，在开箱即用的基础上支持高度定制化，按需可对所有 DOM 节点进行调整或重写，完全分离结构与样式，布局、展现方式及主题样式交由 CSS 实现。
+[![Build Status](https://nodei.co/npm/weel-keypad.png)](https://www.npmjs.com/weel-keypad)
 
-**master** 分支中 `dist` 目录里的用于 [Demo](http://keypad.weel.xyz/) 的库文件可能不是最新的代码，建议克隆 **develop** 分支后手动构建文件。
+[![Build Status](https://travis-ci.org/wallenweel/weel-keypad.svg)](https://travis-ci.org/wallenweel/weel-keypad)
+[![Dependency Status](https://david-dm.org/wallenweel/weel-keypad.svg)](https://david-dm.org/wallenweel/weel-keypad)
 
-
-## 项目进展状态
-
-pre-Alpha --> Alpha ✔ --> Beta
+优先移动端浏览器环境使用的虚拟键盘，在开箱即用的基础上支持高度定制化，按需可对所有 DOM 节点进行调整或重写，完全分离结构与样式，布局、展现方式及主题样式交由 CSS 实现。
 
 
-## 截图预览
+## 安装
+
++ NPM 下载
+```bash
+npm i weel-translate
+```
+
++ 切换至 **master** 分支下载 `dist/weel-keypad.min.js` 用于浏览器环境的打包
++ 克隆 **develop** 分支到本地，按照 [构建项目](#构建项目) 部分打包文件
+
+
+## 截图
 
 ![数字键盘](screenshots/number.png)
 ![QWER 键盘](screenshots/qwer.png)
-![深色主题](screenshots/qwer_dark.png)
 
 
-## 特性清单
+## 计划特性
 
 - [x] 数字键盘布局
 - [x] 自定义键盘布局
@@ -37,17 +43,14 @@ pre-Alpha --> Alpha ✔ --> Beta
 - [x] 支持键盘切换
 
 
-## 下载使用
-
-1. 使用 develop 分支手动构建，或者切换道  master 分支找到`dist/` 目录
-2. 下载合适的库文件，浏览器环境建议 `keypad.umd.min.js` （通用模块）
-3. 在页面中引入库文件
-4. 使用 new 操作符实例化 `new Keypad(options, [, layouts, maps])`，具体演示可访问 [Demo](http://keypad.weel.xyz/) 页面
-
-
-## 选项
+## 使用说明
 
 > 实例化所需的所有选项都是可选的，根据需求进行配置即可。
+
+```javascript
+/** 使用 new 操作符进行实例化 */
+const kypd = new Keypad(options, [, layouts, maps])
+```
 
 ### 配置选项 `options`
 ```javascript
@@ -146,19 +149,15 @@ export const qwer = [
 ]
 
 // 单个普通按键 “0”
-[
-  '0', // 显示名称
-  0, // 按键的值，可选
-  null // 按键对应的键码，可选
-]
+[ '0', 0, null ]
 // 等价于，value 值不存在时默认使用 text 名称作为值
 ['0']
 
 // 单个功能按键
 [
-  'backspace', // 名称
+  'Ctrl', // 名称
   null, // 没有值的话使用 null 来忽略
-  'backspace' // 自定义键码，程序内置了几个（见 maps 部分），也可自定义设置
+  'ctrl' // 自定义键码，程序内置了几个（见 maps 部分），也可自定义设置
 ]
 
 // 切换到键盘
@@ -180,12 +179,9 @@ export const defaultMaps = {
 }
 ```
 
-## 方法 & 属性
+## 实例的方法 & 属性
 
 ```javascript
-/** 实例化 */
-const kypd = new Keypad({...})
-
 /** 可调用的方法 */
 // 显示|隐藏|切换，参数 `name` 同选项 "name"
 kypd.show([, name])

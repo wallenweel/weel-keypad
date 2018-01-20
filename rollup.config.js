@@ -1,4 +1,4 @@
-import nodeResolve from 'rollup-plugin-node-resolve'
+import resolve from 'rollup-plugin-node-resolve'
 import eslint from 'rollup-plugin-eslint'
 import babel from 'rollup-plugin-babel'
 
@@ -11,13 +11,18 @@ import nested from 'postcss-nested'
 import cssnext from 'postcss-cssnext'
 import cssnano from 'cssnano'
 
+import manifest from './package.json'
+
 const min = process.env.NODE_ENV === 'production' ? '.min' : ''
 
+const banner = `/*!
+  * Weel Keypad v${manifest.version}
+  * (c) 2018 ${manifest.author}
+  * Released under the MIT License.
+  */`
+
 const plugins = [
-  nodeResolve({
-    jsnext: true,
-    main: true
-  }),
+  resolve(),
   postcss({
     plugins: [
       simplevars(),
@@ -37,14 +42,17 @@ const bundle = {
   input: 'src/main.js',
   output: [{
     file: `dist/keypad.common${min}.js`,
-    format: 'cjs'
+    format: 'cjs',
+    banner
   }, {
     file: `dist/keypad.esm${min}.js`,
-    format: 'es'
+    format: 'es',
+    banner
   }, {
     file: `dist/keypad${min}.js`,
     name: 'Keypad',
-    format: 'umd'
+    format: 'umd',
+    banner
   }],
   plugins
 }
