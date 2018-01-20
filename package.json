@@ -24,7 +24,7 @@
     "index.html"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "karma start",
     "start": "npm run watch",
     "watch": "rollup-watch-fix && npm run bundle -- -w",
     "bundle": "rollup -c --environment NODE_ENV:development -m",
@@ -46,6 +46,13 @@
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
+    "jasmine": "^2.9.0",
+    "jasmine-core": "^2.9.1",
+    "karma": "^2.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.1.1",
+    "karma-jasmine": "^1.1.1",
+    "karma-rollup-preprocessor": "^5.1.1",
     "node-sass": "^4.7.2",
     "postcss-cssnext": "^3.0.2",
     "postcss-nested": "^3.0.0",
