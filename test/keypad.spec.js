@@ -17,6 +17,5 @@ describe('Keypad', () => {
     for (const [name, keypad] of Object.entries(kypd.keypads)) {
       expect(keypad.getAttribute(status)).toBe('ready')
     }
-    kypd.show()
   })
 })
