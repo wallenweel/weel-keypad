@@ -1,68 +1,33 @@
+import defaultOptions from '../configs/options'
+import * as defaultLayouts from '../configs/layouts'
+import defaultMaps from '../configs/maps'
 import * as images from '../images'
 
-import { number, qwer } from '../layouts'
-
-export const defaultOptions = {
-  el: null, // target element
-  input: null, // need to set value
-  inputWhen: 'end',
-
-  flex: true, // use flex layout
-  mobile: true, // choose to use "touch" or "mouse" event
-
-  onstart: null, // touchstart|keydown callback
-  onend: null, // touchend|keyup callback,
-
-  name: 'number',
-  show: false,
-  multiple: true,
-
-  render: null,
-  reducer: {
-    wrap: null,
-    container: null,
-    content: null,
-    row: null,
-    key: null
-  },
-
-  tag: null,
-  theme: 'default',
-  dark: false,
-
-  inject: document.body // the wrap element to be injected keypad
-}
-
-export const defaultLayouts = {
-  number,
-  qwer
-}
-
-export const defaultMaps = {
-  upper: 'upper',
-  ctrl: 'ctrl',
-  alt: 'alt',
-  shift: 'shift'
-}
-
+/**
+ * Keypad class
+ *
+ * @param {Object} options user options
+ * @param {Object} layouts user layouts
+ * @param {Object} maps user maps
+ */
 export default class Keypad {
   constructor (options = {}, layouts = {}, maps = {}) {
     this.options = Object.assign({}, defaultOptions, options)
     this.layouts = Object.assign({}, defaultLayouts, layouts)
     this.maps = Object.assign({}, defaultMaps, maps)
 
-    this.input = this.options['input']
+    const { el, input, show, inject } = this.options
+
+    this.input = input || null
     this.wrap = null
+    this.parent = inject || null
+
     this.keypads = {}
     this.hightlight = null
     this.locked = null
 
-    const { el, show } = this.options
-
-    if (el) this.listen(el)
-
-    this.inject()
-
+    if (el) this.listen()
+    if (inject) this.inject()
     if (show) this.show()
   }
 
@@ -77,7 +42,7 @@ export default class Keypad {
   }
 
   prefix (type = 'elem', name = '') {
-    const { flex = true } = this.options
+    const { flex } = this.options
 
     return {
       elem: `kypd${flex ? '-flex' : ''}-${name || 'span'}`,
@@ -98,13 +63,14 @@ export default class Keypad {
   }
 
   reducer (name) {
-    if (!Keypad.istype(this.options['reducer'], 'object')) {
-      console.error('"reducer" must to be a plain object.')
-      return
+    const { reducer } = this.options
+
+    if (!Keypad.istype(reducer, 'object')) {
+      return console.error('"reducer" must to be a plain object.')
     }
 
-    if (typeof this.options['reducer'][name] === 'function') {
-      return target => this.options['reducer'][name].call(this, target)
+    if (typeof reducer[name] === 'function') {
+      return target => reducer[name].call(this, target)
     }
 
     return target => target
@@ -211,7 +177,9 @@ export default class Keypad {
   }
 
   keyMap (when, value, code) {
-    const keypad = this.keypads[this.options['name']]
+    const { name } = this.options
+
+    const keypad = this.keypads[name]
 
     const attr = this.prefix('attr', 'hightlight')
     let hightlight = keypad.getAttribute('hightlight') || ''
@@ -240,20 +208,20 @@ export default class Keypad {
     }
 
     if (when === 'end' && /^@@/.test(code)) {
-      const name = code.match(/^@@(.*)/)[1]
+      const _name = code.match(/^@@(.*)/)[1]
 
       this.hide()
 
       const layouts = Object.keys(this.layouts)
 
-      if (typeof name === 'string' && !name.length) {
-        let next = layouts.indexOf(this.options['name']) + 1
+      if (typeof _name === 'string' && !_name.length) {
+        let next = layouts.indexOf(name) + 1
 
         this.options['name'] = layouts[next === layouts.length ? 0 : next]
       }
 
-      if (layouts.includes(name)) {
-        this.options['name'] = name
+      if (layouts.includes(_name)) {
+        this.options['name'] = _name
       }
 
       this.show()
@@ -282,8 +250,10 @@ export default class Keypad {
   }
 
   render (layouts = this.layouts) {
-    if (typeof this.options['render'] === 'function') {
-      return this.options['render'].call(this)
+    const { render, theme, dark } = this.options
+
+    if (typeof render === 'function') {
+      return render.call(this)
     }
 
     const wrap = this.createElement('wrap')
@@ -308,23 +278,35 @@ export default class Keypad {
     }
 
     wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
-    wrap.setAttribute(this.prefix('attr', 'theme'), this.options['theme'])
-    wrap.setAttribute(this.prefix('attr', 'dark'), this.options['dark'])
+    wrap.setAttribute(this.prefix('attr', 'theme'), theme)
+    wrap.setAttribute(this.prefix('attr', 'dark'), dark)
 
     this.wrap = this.reducer('wrap')(wrap)
 
     return this.wrap
   }
 
-  inject (target = this.options['inject']) {
-    target.appendChild(this.render(
-      this.options['multiple']
-        ? this.layouts
-        : { [this.options['name']]: this.layouts[this.options['name']] }
-    ))
+  inject (target) {
+    const { inject, name, multiple } = this.options
+
+    const wrap = target || inject
+
+    wrap.appendChild(
+      this.render(multiple ? this.layouts : { [name]: this.layouts[name] })
+    )
+
+    this.parent = wrap
   }
 
-  listen (el = null) {
+  remove () {
+    if (this.wrap && this.parent) {
+      return this.parent.removeChild(this.wrap)
+    }
+
+    return console.log('Has not found "Keypad" that needed to be removed.')
+  }
+
+  listen (el = this.options['el']) {
     if (!el) return false
 
     let targets = []
@@ -386,6 +368,10 @@ export default class Keypad {
     } else {
       this.show(name)
     }
+  }
+
+  dark (status = true) {
+    this.wrap.setAttribute(this.prefix('attr', 'dark'), !!status)
   }
 
   static istype (o, type) {

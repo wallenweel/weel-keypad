@@ -34,51 +34,56 @@ pre-Alpha --> Alpha ✔ --> Beta
 - [x] 支持键盘切换
 
 
-## 使用 & 选项说明
+## 下载使用
 
 1. 使用 develop 分支手动构建，或者切换道  master 分支找到`dist/` 目录
 2. 下载合适的库文件，浏览器环境建议 `keypad.umd.min.js` （通用模块）
 3. 在页面中引入库文件
 4. 使用 new 操作符实例化 `new Keypad(options, [, layouts, maps])`，具体演示可访问 [Demo](http://keypad.weel.xyz/) 页面
 
+
+## 选项
+
+> 实例化所需的所有选项都是可选的，根据需求进行配置即可。
+
 ### 配置选项 `options`
 ```javascript
 export const defaultOptions = {
   // 可以响应 “focus|blur” 事件的元素，例如，<input type="text">、<div contenteditable>
   // 支持 selector 字符串，使用 querySelectorAll 查找 DOMs
-  el: null,
+  el: null, // {HTMLElement|NodeList|String}
 
-  // 接受并存储按键内容的 “input” 元素, 只支持单个 DOM 元素
-  input: null,
+  // 接受并存储按键内容的 “input” 元素，只支持单个 DOM 元素
+  input: null, // {HTMLElement}
 
   // 默认 true 使用 Flex 布局，false 使用 Float 布局
-  flex: true,
+  flex: true, // {Boolean}
 
   // 默认 true 使用 touch 相关事件，false 使用 mouse 相关事件
-  mobile: true,
+  mobile: true, // {Boolean}
 
-  // 按键按下时触发回调函数
-  onstart: null, // 数组参数： [text, value, code]
+  // 按键按下时触发回调函数，数组参数： [text, value, code]
+  onstart: null, // {Function}
 
-  // 按键放开时触发回调函数
-  onend: null,  // 参数同上
+  // 按键放开时触发回调函数，参数同上
+  onend: null,  // {Function}
 
   // true 为载入后立即显示
-  show: false,
+  show: false, // {Boolean}
 
-  // 默认显示的键盘布局，默认数字键盘
-  name: 'number', // 可用值：number, qwer
+  // 默认显示的键盘布局，默认数字键盘，可用值：number, qwer
+  name: 'number', // {String}
 
   // 是否渲染多键盘，false 为只渲染 “name” 指定的键盘
-  multiple: true,
+  multiple: true, // {Boolean}
 
-  // 替换程序的渲染方法
-  render: null, // 实验特性
+  // 替换程序的渲染方法, 参数：layouts
+  render: null, // {Function}
 
-  // 个部分元素渲染时应用钩子
-  // 参数：target（目标元素），this 为当前 Keypad 实例
-  // 提示：定义 target 后必须 return target 以继续完整的渲染
+  // 个部分元素渲染时应用钩子，参数：target，this 为当前 Keypad 实例
+  // 定义 target 后必须 return target 以继续完整的渲染
   reducer: {
+    // {Function}
     wrap: null,
     container: null,
     content: null,
@@ -87,16 +92,17 @@ export const defaultOptions = {
   },
 
   // 替换 kypd-name 的自定义标签，会无效化所有的默认样式
-  tag: null,
+  tag: null, // {Strimg}
 
   // 自定义主题名称，kypd-<flex|float>wrap[data-kypd-theme=""default]
-  theme: 'default',
+  theme: 'default', // {String}
   
   // 暗色主题开关，kypd-<flex|float>wrap[data-kypd-dark=""false]
-  dark: false,
+  dark: false, // {Boolean}
 
   // 使用 appendChild 方法注入键盘的位置，默认为 body
-  inject: document.body
+  // 值为 falsy 的话则只渲染不注入到页面中，之后手动调用 keypad.inject()
+  inject: document.body // {HTMLElement?}
 }
 ```
 
@@ -171,10 +177,36 @@ export const defaultMaps = {
 }
 ```
 
-## 接口方法
+## 方法 & 属性
 
 ```javascript
+/** 实例化 */
+const kypd = new Keypad({...})
 
+/** 可调用的方法 */
+// 显示|隐藏|切换，参数 `name` 同选项 "name"
+kypd.show([, name])
+kypd.hide([, name])
+kypd.toggle([, name])
+
+//手动将键盘注入到页面，参数 `target` 同选项 "inject"
+kypd.inject([, target])
+
+// 手动监听 input 元素 focus|blur 事件，参数 `el` 同选项 "el"
+kypd.listen([, el])
+
+// 从页面中移除由载 kypd.inject() 入的最后一个
+kypd.remove()
+
+// 更新深色主题，参数 status 默认为 truthy，falsy 则关闭深色主题
+kypd.dark([, status])
+
+/** 可使用的属性 */
+kypd.options // 合并后的选项
+kypd.layouts // 合并后的键盘布局
+kypd.maps // 合并后的按键映射
+kypd.wrap // 包裹键盘内容的根元素
+kypd.input // 选项中的 "input" 或者监听后的触发focus 的 input 元素
 ```
 
 
