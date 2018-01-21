@@ -64,7 +64,7 @@ module.exports = function(config) {
 
     coverageReporter: {
       reporters: [
-        { type:'html', dir : 'coverage/' },
+        // { type:'html', dir : 'coverage/' },
         // generates ./coverage/lcov.info
         { type:'lcovonly', subdir: '.' },
         // generates ./coverage/coverage-final.json

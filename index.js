@@ -29,12 +29,12 @@ document.querySelector('button.js-hide-keypad')
 // demo 3
 const keypad3 = new Keypad({
   mobile: isMobile,
-  show: false,
+  show: true,
   name: 'qwer',
   reducer: {
     key (target) {
       if (target.textContent === 'Space') {
-        target.textContent = '空 格'
+        target.childNodes[0].textContent = '空 格'
       }
       return target
     }
@@ -56,6 +56,7 @@ document.querySelector('button.js-toggle-keypad2')
 const keypad4 = new Keypad({
   input: document.querySelector('input.js-readonly-input'),
   mobile: isMobile,
+  multiple: false,
   onend ([, , code]) {
     const i = document.querySelector('input.js-readonly-input').value.length
     const items = document.querySelectorAll('.js-show-keypad-password > i')

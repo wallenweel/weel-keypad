@@ -12,12 +12,13 @@
 
 ## 安装
 
+> 只是在浏览器环境引用的话，使用第一种方式，支持 require.js 加载。
+
++ 切换至 **master** 分支下载 [`dist/keypad.min.js`](tree/master/dist/keypad.min.js) 用于浏览器环境的打包
 + NPM 下载
 ```bash
 npm i weel-translate
 ```
-
-+ 切换至 **master** 分支下载 `dist/weel-keypad.min.js` 用于浏览器环境的打包
 + 克隆 **develop** 分支到本地，按照 [构建项目](#构建项目) 部分打包文件
 
 
@@ -82,7 +83,7 @@ export const defaultOptions = {
   // 默认显示的键盘布局，默认数字键盘，可用值：number, qwer
   name: 'number', // {String}
 
-  // 是否渲染多键盘，false 为只渲染 “name” 指定的键盘
+  // 是否渲染多键盘，false 为只渲染 “name” 指定的键盘并且隐藏切换"@@"键盘按钮
   multiple: true, // {Boolean}
 
   // 替换程序的渲染方法, 参数：layouts

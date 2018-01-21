@@ -9,7 +9,7 @@
       &container {
         background-color: inherit;
         border-top: 1px #f5f5f5 solid;
-        padding: 8px 0;
+        padding: 8px 4px;
 
         &[#{$data}locked="upper"] {
           [#{$data}key-code="upper"] {
@@ -22,24 +22,33 @@
       
       &key {
         cursor: default;
-  
-        border-radius: 2px;
-        box-shadow: 0 1px 2px rgba(73, 158, 255, 0.431);
-        margin: 2px;
-        font-size: 16px;
-  
-        background-color: #ffffff;
-        color: $primary-light;
-  
-        transition: background-color .25s cubic-bezier(0.075, 0.82, 0.165, 1),
-                    color .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+        padding: 4px 2px;
         
-        &[#{$data}status="start"] {
+        > span {
+          border-radius: 2px;
+          box-shadow: 0 1px 2px rgba(73, 158, 255, 0.431);
+  
+          height: 44px;
+  
+          // margin: 6px 2px;
+          font-size: 16px;
+
+          display: flex;
+    
+          background-color: #ffffff;
+          color: $primary-light;
+    
+          transition: background-color .25s cubic-bezier(0.075, 0.82, 0.165, 1),
+                      color .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        &[#{$data}status="start"] > span {
           background-color: $primary-light;
           color: #ffffff;
         }
   
-        &[#{$data}key-code="enter"] {
+        &[#{$data}key-code="enter"] > span {
           border-radius: 8px;
           background-color: $primary-light;
           color: #ffffff;
@@ -59,7 +68,7 @@
         #{$flex}key {
           width: 0;
           
-          &[#{$data}key-code="backspace"],
+          // &[#{$data}key-code="backspace"],
           &[#{$data}key-value="0"] {
             flex-grow: 2;
           }
@@ -67,6 +76,17 @@
       }
       
       &[#{$data}name="qwer"] {
+        #{$flex}key-row:nth-child(2) {
+          &::before,
+          &::after {
+            content: "";
+            display: flex;
+            flex: 1 1 auto;
+            margin-left: -6px;
+            margin-right: -6px;
+          }
+        }
+
         #{$flex}key {
           width: 0;
           
@@ -74,7 +94,7 @@
             flex-grow: 6;
           }
           
-          &[#{$data}key-code="backspace"],
+          // &[#{$data}key-code="backspace"],
           &[#{$data}key-code="enter"],
           &[#{$data}key-code="@@number"] {
             flex-grow: 2;

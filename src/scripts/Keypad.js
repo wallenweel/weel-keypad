@@ -77,9 +77,12 @@ export default class Keypad {
   }
 
   generator (layout) {
+    const { multiple } = this.options
+
     const content = this.createElement('content')
-    const key = this.createElement('key')
     const keyRow = this.createElement('key-row')
+    const key = this.createElement('key')
+    const span = document.createElement('span')
 
     const rowReducer = this.reducer('row')
     const keyReducer = this.reducer('key')
@@ -89,6 +92,7 @@ export default class Keypad {
 
       for (let [keyText, keyValue, keyCode] of group) {
         const _key = key.cloneNode()
+        const _span = span.cloneNode()
 
         if (/svg\[.+\]/.test(keyText)) {
           const name = keyText.match(/svg\[(.+)\]/)[1]
@@ -102,14 +106,14 @@ export default class Keypad {
           const fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div')
           fake.innerHTML = svg
 
-          _key.appendChild(fake.querySelector('svg'))
+          _span.appendChild(fake.querySelector('svg'))
         } else if (/(<\/svg>[\s]?)$/.test(keyText)) {
           const fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div')
           fake.innerHTML = keyText
 
-          _key.appendChild(fake.querySelector('svg'))
+          _span.appendChild(fake.querySelector('svg'))
         } else {
-          _key.textContent = keyText
+          _span.textContent = keyText
         }
 
         if (keyValue || (!keyValue && !keyCode)) {
@@ -117,7 +121,13 @@ export default class Keypad {
           _key.setAttribute(this.prefix('attr', 'key-value'), keyValue || keyText)
         }
 
-        if (keyCode) _key.setAttribute(this.prefix('attr', 'key-code'), keyCode)
+        if (keyCode) {
+          if (!multiple && /^@@/.test(keyCode + '')) {
+            continue
+          }
+
+          _key.setAttribute(this.prefix('attr', 'key-code'), keyCode)
+        }
 
         _key.setAttribute(this.prefix('attr', 'status'), '')
 
@@ -131,6 +141,7 @@ export default class Keypad {
           false
         )
 
+        _key.appendChild(_span)
         _keyRow.appendChild(keyReducer(_key))
       }
 
