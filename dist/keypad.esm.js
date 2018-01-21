@@ -1,5 +1,5 @@
 /*!
-  * Weel Keypad v0.1.4
+  * Weel Keypad v0.2.1
   * (c) 2018 wallen
   * Released under the MIT License.
   */
@@ -132,22 +132,25 @@ if (!Array.prototype.includes) {
 }
 
 var defaultOptions = {
-  el: null, // target element
-  input: null, // need to set value
-  inputWhen: 'end',
+  el: null, // listened input element
+  input: null, // the input element that need to set value
+  inputWhen: 'end', // the time to set input's value, 'start' or 'end'
 
   flex: true, // use flex layout
-  mobile: true, // choose to use "touch" or "mouse" event
+  mobile: true, // choose to use "touch" or "mouse" event by boolean
 
   onstart: null, // touchstart|keydown callback
   onend: null, // touchend|keyup callback,
 
-  name: 'number',
-  show: false,
-  multiple: true,
+  name: 'number', // default keypad layout name
+  multiple: true, // render all keypad layouts
+  show: false, // show keypad after injected
+  // hide keypad when 'body' is clicked,
+  // support event name, default 'click'
+  hide: false,
 
-  render: null,
-  reducer: {
+  render: null, // a callback to replace Keypad's render method
+  reducer: { // nodes's hook
     wrap: null,
     container: null,
     content: null,
@@ -155,16 +158,18 @@ var defaultOptions = {
     key: null
   },
 
-  tag: null,
-  theme: 'default',
-  dark: false,
+  tag: null, // custom tag name
+  theme: 'default', // theme name
+  dark: false, // dark theme mode
 
-  inject: document.body // the wrap element to be injected keypad
+  // the wrap element to be injected keypad,
+  // support callback to repleace default
+  body: document.body
 };
 
-var number = [[[7], [8], [9]], [[4], [5], [6]], [[1], [2], [3]], [['En', null, '@@qwer'], ['·', '.'], [0], ['svg[backspace]', null, 'backspace']]];
+var number = [[[7], [8], [9]], [[4], [5], [6]], [[1], [2], [3]], [['En', null, '@@qwer'], ['.'], [0], ['svg[backspace]', null, 'backspace']]];
 
-var qwer = [[['q'], ['w'], ['e'], ['r'], ['t'], ['y'], ['u'], ['i'], ['o'], ['p']], [['a'], ['s'], ['d'], ['f'], ['g'], ['h'], ['j'], ['k'], ['l']], [['svg[upper]', null, 'upper'], ['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m'], [','], ['.']], [['123', null, '@@number'], ['Space', ' '], ['svg[backspace]', null, 'backspace'], ['svg[done]', null, 'enter']]];
+var qwer = [[['q'], ['w'], ['e'], ['r'], ['t'], ['y'], ['u'], ['i'], ['o'], ['p']], [['a'], ['s'], ['d'], ['f'], ['g'], ['h'], ['j'], ['k'], ['l']], [['svg[upper]', null, 'upper'], ['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m'], ['svg[backspace]', null, 'backspace']], [['123', null, '@@number'], ['Space', ' '], [','], ['.'], ['svg[done]', null, 'enter']]];
 
 var defaultLayouts = Object.freeze({
 	number: number,
@@ -172,6 +177,7 @@ var defaultLayouts = Object.freeze({
 });
 
 var defaultMaps = {
+  backspace: 'backspace',
   upper: 'upper',
   ctrl: 'ctrl',
   alt: 'alt',
@@ -306,11 +312,27 @@ var slicedToArray = function () {
  */
 
 var Keypad = function () {
+  // constructor (options = {}, layouts = {}, maps = {}) {
   function Keypad() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var layouts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    var maps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     classCallCheck(this, Keypad);
+
+    for (var _len = arguments.length, configs = Array(_len), _key2 = 0; _key2 < _len; _key2++) {
+      configs[_key2] = arguments[_key2];
+    }
+
+    var _configs$ = configs[0],
+        options = _configs$ === undefined ? {} : _configs$,
+        _configs$2 = configs[1],
+        layouts = _configs$2 === undefined ? {} : _configs$2,
+        _configs$3 = configs[2],
+        maps = _configs$3 === undefined ? {} : _configs$3;
+
+
+    if (typeof options === 'function') options = options(Object.assign({}, defaultOptions));
+    if (typeof layouts === 'function') layouts = layouts(Object.assign({}, defaultLayouts));
+    if (typeof maps === 'function') maps = maps(Object.assign({}, defaultMaps));
+
+    options.mobile = Keypad.isMobile;
 
     this.options = Object.assign({}, defaultOptions, options);
     this.layouts = Object.assign({}, defaultLayouts, layouts);
@@ -320,20 +342,22 @@ var Keypad = function () {
         el = _options.el,
         input = _options.input,
         show = _options.show,
-        inject = _options.inject;
+        hide = _options.hide,
+        body = _options.body;
 
 
     this.input = input || null;
     this.wrap = null;
-    this.parent = inject || null;
+    this.parent = body || null;
 
     this.keypads = {};
     this.hightlight = null;
     this.locked = null;
 
     if (el) this.listen();
-    if (inject) this.inject();
+    if (body) this.inject();
     if (show) this.show();
+    if (hide) this.bodyHide();
   }
 
   createClass(Keypad, [{
@@ -392,9 +416,13 @@ var Keypad = function () {
     value: function generator(layout) {
       var _this2 = this;
 
+      var multiple = this.options.multiple;
+
+
       var content = this.createElement('content');
-      var key = this.createElement('key');
       var keyRow = this.createElement('key-row');
+      var key = this.createElement('key');
+      var span = document.createElement('span');
 
       var rowReducer = this.reducer('row');
       var keyReducer = this.reducer('key');
@@ -411,6 +439,7 @@ var Keypad = function () {
 
           var _loop = function _loop(keyText, _keyValue, keyCode) {
             var _key = key.cloneNode();
+            var _span = span.cloneNode();
 
             if (/svg\[.+\]/.test(keyText)) {
               var name = keyText.match(/svg\[(.+)\]/)[1];
@@ -424,14 +453,14 @@ var Keypad = function () {
               var fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
               fake.innerHTML = svg;
 
-              _key.appendChild(fake.querySelector('svg'));
+              _span.appendChild(fake.querySelector('svg'));
             } else if (/(<\/svg>[\s]?)$/.test(keyText)) {
               var _fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
               _fake.innerHTML = keyText;
 
-              _key.appendChild(_fake.querySelector('svg'));
+              _span.appendChild(_fake.querySelector('svg'));
             } else {
-              _key.textContent = keyText;
+              _span.textContent = keyText;
             }
 
             if (_keyValue || !_keyValue && !keyCode) {
@@ -439,7 +468,13 @@ var Keypad = function () {
               _key.setAttribute(_this2.prefix('attr', 'key-value'), _keyValue || keyText);
             }
 
-            if (keyCode) _key.setAttribute(_this2.prefix('attr', 'key-code'), keyCode);
+            if (keyCode) {
+              if (!multiple && /^@@/.test(keyCode + '')) {
+                return 'continue';
+              }
+
+              _key.setAttribute(_this2.prefix('attr', 'key-code'), keyCode);
+            }
 
             _key.setAttribute(_this2.prefix('attr', 'status'), '');
 
@@ -451,6 +486,7 @@ var Keypad = function () {
               return _this2.handleKey(ev, 'end', [keyText, _keyValue, keyCode]);
             }, false);
 
+            _key.appendChild(_span);
             _keyRow.appendChild(keyReducer(_key));
             keyValue = _keyValue;
           };
@@ -460,7 +496,7 @@ var Keypad = function () {
           var _iteratorError2 = undefined;
 
           try {
-            for (var _iterator2 = group[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            _loop2: for (var _iterator2 = group[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
               var _ref = _step2.value;
 
               var _ref2 = slicedToArray(_ref, 3);
@@ -471,7 +507,12 @@ var Keypad = function () {
 
               var _ret = _loop(keyText, keyValue, keyCode);
 
-              if (_ret === 'break') break;
+              switch (_ret) {
+                case 'break':
+                  break _loop2;
+
+                case 'continue':
+                  continue;}
             }
           } catch (err) {
             _didIteratorError2 = true;
@@ -533,8 +574,8 @@ var Keypad = function () {
       }
 
       if (!keyCode && this.locked === this.maps['upper']) {
-        keyText = keyText && keyText.toUpperCase();
-        keyValue = keyValue && keyValue.toUpperCase();
+        keyText = keyText && ('' + keyText).toUpperCase();
+        keyValue = keyValue && ('' + keyValue).toUpperCase();
       }
 
       this.keyMap(when, keyValue, keyCode);
@@ -606,24 +647,29 @@ var Keypad = function () {
   }, {
     key: 'keyInput',
     value: function keyInput(value, code) {
-      if (!this.input) return true;
+      if (!this.input || !(value === 0 ? '0' : value) && code !== this.maps['backspace']) return true;
 
-      var v = this.input.value;
-      var s = this.input.selectionStart;
+      var _value = this.input.value;
+      var start = this.input.selectionStart;
+      var end = this.input.selectionEnd;
 
-      if (v && code === 'backspace') {
-        v = v.slice(0, s - 1) + v.slice(s);
-        s--;
+      if (end - start) {
+        _value = _value.slice(0, start) + _value.slice(end);
+      }
+
+      if (_value && code === this.maps['backspace'] && !(end - start)) {
+        _value = _value.slice(0, start - 1) + _value.slice(start);
+        start--;
       }
 
       var type = Keypad.istype(value);
       if (type !== 'null' && type !== 'undefined') {
-        v = v.slice(0, s) + value + v.slice(s);
-        s++;
+        _value = _value.slice(0, start) + value + _value.slice(start);
+        start++;
       }
 
-      this.input.value = v;
-      this.input.selectionEnd = s;
+      this.input.value = _value;
+      this.input.selectionEnd = start;
     }
   }, {
     key: 'render',
@@ -690,6 +736,10 @@ var Keypad = function () {
       wrap.setAttribute(this.prefix('attr', 'theme'), theme);
       wrap.setAttribute(this.prefix('attr', 'dark'), dark);
 
+      wrap.addEventListener(this.events.start, function (ev) {
+        return ev.stopPropagation() || ev.preventDefault();
+      }, false);
+
       this.wrap = this.reducer('wrap')(wrap);
 
       return this.wrap;
@@ -698,12 +748,12 @@ var Keypad = function () {
     key: 'inject',
     value: function inject(target) {
       var _options3 = this.options,
-          inject = _options3.inject,
+          body = _options3.body,
           name = _options3.name,
           multiple = _options3.multiple;
 
 
-      var wrap = target || inject;
+      var wrap = target || body;
 
       wrap.appendChild(this.render(multiple ? this.layouts : defineProperty({}, name, this.layouts[name])));
 
@@ -758,6 +808,25 @@ var Keypad = function () {
           _this3.hide();
         }, false);
       });
+    }
+  }, {
+    key: 'bodyHide',
+    value: function bodyHide(ev) {
+      var _this4 = this;
+
+      var flag = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.options['hide'];
+
+      if (!flag) return false;
+
+      var _flag = typeof flag === 'string' ? flag : 'click';
+
+      document.body.addEventListener(_flag, function (ev) {
+        return _this4.hide();
+      }, false);
+
+      this.wrap.addEventListener(_flag, function (ev) {
+        return ev.stopPropagation() || ev.preventDefault();
+      }, false);
     }
   }, {
     key: 'show',
@@ -828,13 +897,13 @@ var Keypad = function () {
   return Keypad;
 }();
 
-var css = "kypd-flex-wrap, kypd-wrap {\n  width: 100%;\n  font-family: Arial, Helvetica, sans-serif;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  z-index: 999999999;\n  position: fixed;\n  display: block;\n  -webkit-transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-wrap[data-kypd-status=\"none\"], kypd-wrap[data-kypd-status=\"none\"] {\n    display: none; }\n  kypd-flex-wrap[data-kypd-status=\"ready\"], kypd-wrap[data-kypd-status=\"ready\"] {\n    opacity: 0;\n    visibility: hidden;\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%); }\n  kypd-flex-wrap[data-kypd-status=\"active\"], kypd-wrap[data-kypd-status=\"active\"] {\n    opacity: 1;\n    visibility: visible;\n    -webkit-transform: translateY(0%);\n            transform: translateY(0%); }\n\nkypd-flex-container, kypd-container {\n  width: inherit;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  position: absolute; }\n  kypd-flex-container[data-kypd-status=\"ready\"], kypd-container[data-kypd-status=\"ready\"] {\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%);\n    -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-container[data-kypd-status=\"active\"], kypd-container[data-kypd-status=\"active\"] {\n    -webkit-transform: translateY(0);\n            transform: translateY(0); }\n  kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-value], kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-value] {\n    text-transform: uppercase; }\n\nkypd-flex-key svg, kypd-key svg {\n  fill: currentColor; }\n\nkypd-flex-container {\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n  kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-content {\n    max-width: 240px; }\n  kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-content {\n    max-width: 560px; }\n\nkypd-flex-content {\n  width: 100%;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key-row {\n  width: 100%;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key {\n  height: 48px;\n  width: 100%;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: auto;\n          flex: auto; }\n";
+var css = "kypd-flex-wrap, kypd-wrap {\n  width: 100%;\n  font-family: Arial, Helvetica, sans-serif;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  z-index: 999999999;\n  position: fixed;\n  display: block;\n  -webkit-transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-wrap[data-kypd-status=\"none\"], kypd-wrap[data-kypd-status=\"none\"] {\n    display: none; }\n  kypd-flex-wrap[data-kypd-status=\"ready\"], kypd-wrap[data-kypd-status=\"ready\"] {\n    opacity: 0;\n    visibility: hidden;\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%); }\n  kypd-flex-wrap[data-kypd-status=\"active\"], kypd-wrap[data-kypd-status=\"active\"] {\n    opacity: 1;\n    visibility: visible;\n    -webkit-transform: translateY(0%);\n            transform: translateY(0%); }\n\nkypd-flex-container, kypd-container {\n  width: inherit;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  position: absolute; }\n  kypd-flex-container[data-kypd-status=\"ready\"], kypd-container[data-kypd-status=\"ready\"] {\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%);\n    -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-container[data-kypd-status=\"active\"], kypd-container[data-kypd-status=\"active\"] {\n    -webkit-transform: translateY(0);\n            transform: translateY(0); }\n  kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-value], kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-value] {\n    text-transform: uppercase; }\n\nkypd-flex-key svg, kypd-key svg {\n  fill: currentColor; }\n\nkypd-flex-container {\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n  kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-content {\n    max-width: 240px; }\n  kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-content {\n    max-width: 560px; }\n\nkypd-flex-content {\n  width: 100%;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key-row {\n  width: 100%;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key, kypd-flex-key > span {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: auto;\n          flex: auto; }\n";
 __$$styleInject(css);
 
-var css$2 = "kypd-flex-wrap[data-kypd-theme=\"default\"], kypd-wrap[data-kypd-theme=\"default\"] {\n  background-color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-container {\n    background-color: inherit;\n    border-top: 1px #f5f5f5 solid;\n    padding: 8px 0; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"], kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"], kypd-wrap[data-kypd-theme=\"default\"] kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] {\n      border-radius: 2px;\n      background-color: #0077ff;\n      color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-key {\n    cursor: default;\n    border-radius: 2px;\n    -webkit-box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n            box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n    margin: 2px;\n    font-size: 16px;\n    background-color: #ffffff;\n    color: #0077ff;\n    -webkit-transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n    transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"], kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"], kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"] {\n      background-color: #0077ff;\n      color: #ffffff; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"], kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"] {\n      border-radius: 8px;\n      background-color: #0077ff;\n      color: #ffffff; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-key[data-kypd-key-code=\"backspace\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-key[data-kypd-key-value=\"0\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-value=\" \"] {\n    -webkit-box-flex: 6;\n        -ms-flex-positive: 6;\n            flex-grow: 6; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"backspace\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"@@number\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n";
+var css$2 = "kypd-flex-wrap[data-kypd-theme=\"default\"], kypd-wrap[data-kypd-theme=\"default\"] {\n  background-color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-container {\n    background-color: inherit;\n    border-top: 1px #f5f5f5 solid;\n    padding: 8px 4px; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span {\n      border-radius: 2px;\n      background-color: #0077ff;\n      color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-key {\n    cursor: default;\n    padding: 4px 2px; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key > span {\n      border-radius: 2px;\n      -webkit-box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n              box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n      height: 44px;\n      font-size: 16px;\n      display: -webkit-box;\n      display: -ms-flexbox;\n      display: flex;\n      background-color: #ffffff;\n      color: #0077ff;\n      -webkit-transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n      transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"] > span {\n      background-color: #0077ff;\n      color: #ffffff; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"] > span {\n      border-radius: 8px;\n      background-color: #0077ff;\n      color: #ffffff; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-key[data-kypd-key-value=\"0\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key-row:nth-child(2)::before, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key-row:nth-child(2)::after {\n  content: \"\";\n  margin-left: -6px;\n  margin-right: -6px;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 auto;\n          flex: 1 1 auto;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-value=\" \"] {\n    -webkit-box-flex: 6;\n        -ms-flex-positive: 6;\n            flex-grow: 6; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"@@number\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n";
 __$$styleInject(css$2);
 
-var css$4 = "kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] {\n  background-color: #1b1d20; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key {\n    background-color: #1b1d20;\n    -webkit-box-shadow: 0 1px 2px rgba(63, 84, 107, .431);\n            box-shadow: 0 1px 2px rgba(63, 84, 107, .431); }\n    kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"], kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"] {\n      background-color: #0077ff;\n      color: #1b1d20; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"] {\n      background-color: #0077ff;\n      color: #1b1d20; }\n";
+var css$4 = "kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] {\n  background-color: #1b1d20; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-container, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-container, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-container, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-container {\n    border-top: 1px #111417 solid; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key > span {\n    background-color: #1b1d20;\n    -webkit-box-shadow: 0 1px 2px rgba(63, 84, 107, .431);\n            box-shadow: 0 1px 2px rgba(63, 84, 107, .431); }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"] > span {\n    background-color: #0077ff;\n    color: #1b1d20; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"] > span {\n    background-color: #0077ff;\n    color: #1b1d20; }\n";
 __$$styleInject(css$4);
 
 export default Keypad;

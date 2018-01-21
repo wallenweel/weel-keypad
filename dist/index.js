@@ -31,7 +31,7 @@ function __$$styleInject(css, ref) {
   }
 }
 
-var css = "main.container > h4 {\n  margin-top: 48px; }\n\nmain.container .passwords {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n  main.container .passwords + input {\n    margin-bottom: 12px; }\n  main.container .passwords > i {\n    border-radius: 4px;\n    border: 1px solid #eee;\n    height: 32px;\n    width: 32px;\n    margin: 2px;\n    -webkit-box-pack: center;\n        -ms-flex-pack: center;\n            justify-content: center;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex; }\n    main.container .passwords > i::before {\n      content: \"\";\n      border-radius: 5px;\n      background: #333333;\n      height: 10px;\n      width: 10px;\n      display: block;\n      -webkit-transition: opacity .25s ease, visibility .25s ease;\n      transition: opacity .25s ease, visibility .25s ease;\n      opacity: 0;\n      visibility: hidden; }\n    main.container .passwords > i.on::before {\n      opacity: 1;\n      visibility: visible; }\n";
+var css = ".kypd-passwords {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n  .kypd-passwords + input {\n    margin-bottom: 12px; }\n  .kypd-passwords > i {\n    border-radius: 4px;\n    -webkit-box-shadow: 0px 2px 4px 1px rgba(67, 186, 255, .383);\n            box-shadow: 0px 2px 4px 1px rgba(67, 186, 255, .383);\n    height: 32px;\n    width: 32px;\n    margin: 2px;\n    -webkit-box-pack: center;\n        -ms-flex-pack: center;\n            justify-content: center;\n    -webkit-box-align: center;\n        -ms-flex-align: center;\n            align-items: center;\n    display: -webkit-box;\n    display: -ms-flexbox;\n    display: flex; }\n    .kypd-passwords > i::before {\n      content: \"\";\n      border-radius: 5px;\n      background: #22cbff;\n      height: 10px;\n      width: 10px;\n      display: block;\n      -webkit-transition: opacity .25s ease, visibility .25s ease;\n      transition: opacity .25s ease, visibility .25s ease;\n      opacity: .2; }\n    .kypd-passwords > i.on::before {\n      opacity: 1; }\n\n.kypd-theme label,\n.kypd-layout label {\n  margin-right: 12px; }\n\n.kypd-control button {\n  margin-right: 12px; }\n";
 __$$styleInject(css);
 
 var slicedToArray = function () {
@@ -72,108 +72,188 @@ var slicedToArray = function () {
   };
 }();
 
-var isMobile = /Mobile/.test(navigator.userAgent);
-
 /* global Keypad */
+Keypad.isMobile = /Mobile/.test(navigator.userAgent);
 
-// demo 1
-/* eslint-disable no-new */
-new Keypad({
-  el: document.querySelector('input.js-normal-input'),
-  mobile: isMobile
+// setTimeout(() => (document.querySelector('main').scrollTop = 10000), 200)
+
+demo('base', function () {
+  var kypd = new Keypad();
+
+  return kypd;
 });
 
-// demo 2
-var keypad2 = new Keypad({
-  input: document.querySelector('input.js-toggle-input'),
-  mobile: isMobile
+demo('listen', function () {
+  var kypd = new Keypad({
+    el: '#listened-input'
+  });
+
+  return kypd;
 });
 
-document.querySelector('button.js-toggle-keypad').addEventListener('click', function (ev) {
-  keypad2.toggle();
-}, false);
+demo('input', function () {
+  var input = document.querySelector('#readonly-input');
+  var password = document.querySelector('#password');
+  var items = password.querySelectorAll('i');
+  var kypd = new Keypad({
+    input: input,
+    onend: function onend(key) {
+      var code = key[2];
+      var n = input.value.length + 1;
 
-document.querySelector('button.js-show-keypad').addEventListener('click', function (ev) {
-  keypad2.show();
-}, false);
+      if (code === 'backspace') {
+        n--;
 
-document.querySelector('button.js-hide-keypad').addEventListener('click', function (ev) {
-  keypad2.hide();
-}, false);
+        if (n === 0) return kypd.hide();
+        if (n > items.length) n = items.length - 1;
 
-// demo 3
-var keypad3 = new Keypad({
-  mobile: isMobile,
-  show: false,
-  name: 'qwer',
-  reducer: {
-    key: function key(target) {
-      if (target.textContent === 'Space') {
-        target.textContent = '空 格';
-      }
-      return target;
-    }
-  },
-  onstart: function onstart(_ref, ev) {
-    var _ref2 = slicedToArray(_ref, 3),
-        text = _ref2[0],
-        value = _ref2[1],
-        code = _ref2[2];
-
-    console.log(this, ev);
-  },
-  onend: function onend(_ref3) {
-    var _ref4 = slicedToArray(_ref3, 3),
-        text = _ref4[0],
-        value = _ref4[1],
-        code = _ref4[2];
-
-    console.log(text, value, code);
-
-    document.querySelector('.js-toggle-keypad2-v').textContent = value;
-  }
-});
-
-document.querySelector('button.js-toggle-keypad2').addEventListener('click', function (ev) {
-  keypad3.toggle();
-}, false);
-
-// demo 4
-var keypad4 = new Keypad({
-  input: document.querySelector('input.js-readonly-input'),
-  mobile: isMobile,
-  onend: function onend(_ref5) {
-    var _ref6 = slicedToArray(_ref5, 3),
-        code = _ref6[2];
-
-    var i = document.querySelector('input.js-readonly-input').value.length;
-    var items = document.querySelectorAll('.js-show-keypad-password > i');
-
-    if (code === 'backspace') {
-      if (!i) {
-        keypad4.hide();
+        items[n - 1].classList.remove('on');
 
         return false;
       }
 
-      items[i - 1].classList.remove('on');
+      if (n > items.length) {
+        kypd.hide();
+        return true;
+      }
 
-      return false;
+      if (n === items.length) {
+        items[n - 1].classList.add('on');
+        return kypd.hide();
+      }
+
+      items[n - 1].classList.add('on');
     }
+  });
 
-    if (i >= items.length) {
-      keypad4.hide();
-
-      return true;
-    }
-
-    items[i].classList.add('on');
-  }
+  password.addEventListener('click', function (ev) {
+    return kypd.show();
+  }, false);
 });
 
-document.querySelector('.js-show-keypad-password').addEventListener('click', function (ev) {
-  keypad4.show();
+demo('options', function () {
+  var kypd = new Keypad(function (options) {
+    options.dark = true;
+    options.name = 'qwer';
+    options.hide = true;
+
+    options.onstart = function (key) {
+      id('options-print-1').textContent = key[0];
+      id('options-print-2').textContent = key[1];
+      id('options-print-3').textContent = key[2];
+    };
+
+    return options;
+  });
+
+  var theme = {
+    dark: id('theme-color-1'),
+    light: id('theme-color-2')
+  };
+
+  Object.entries(theme).forEach(function (action) {
+    var name = action[0];
+    var target = action[1];
+
+    target.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      kypd.dark(name === 'dark');
+    }, false);
+  });
+
+  var control = {
+    toggle: id('control-1'),
+    show: id('control-2'),
+    hide: id('control-3')
+  };
+
+  Object.entries(control).forEach(function (action) {
+    var name = action[0];
+    var target = action[1];
+
+    target.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      kypd[name]();
+    }, false);
+  });
+
+  var layout = {
+    number: id('layout-1'),
+    qwer: id('layout-2')
+  };
+
+  Object.entries(layout).forEach(function (action) {
+    var name = action[0];
+    var target = action[1];
+
+    target.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      kypd.hide();
+      kypd.show(name);
+    }, false);
+  });
+
+  function id(id) {
+    return document.querySelector('#' + id);
+  }
 }, false);
+
+function demo(id, cb) {
+  var demo = document.querySelector('#' + id);
+
+  if (!demo) return false;
+
+  var buttons = {
+    show: demo.querySelector('.js-show'),
+    hide: demo.querySelector('.js-hide'),
+    toggle: demo.querySelector('.js-toggle')
+  };
+
+  var keypad = cb.call(demo);
+
+  if (!keypad) return false;
+
+  var _loop = function _loop(action, button) {
+    if (!button) return 'continue';
+
+    button.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      keypad[action]();
+    }, false);
+  };
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = Object.entries(buttons)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var _ref = _step.value;
+
+      var _ref2 = slicedToArray(_ref, 2);
+
+      var action = _ref2[0];
+      var button = _ref2[1];
+
+      var _ret = _loop(action, button);
+
+      if (_ret === 'continue') continue;
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+}
 
 })));
 //# sourceMappingURL=index.js.map
