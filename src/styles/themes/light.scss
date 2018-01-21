@@ -12,7 +12,7 @@
         padding: 8px 4px;
 
         &[#{$data}locked="upper"] {
-          [#{$data}key-code="upper"] {
+          [#{$data}key-code="upper"] > span {
             border-radius: 2px;
             background-color: $primary-light;
             color: #ffffff;
@@ -80,10 +80,11 @@
           &::before,
           &::after {
             content: "";
-            display: flex;
-            flex: 1 1 auto;
             margin-left: -6px;
             margin-right: -6px;
+
+            flex: 1 1 auto;
+            display: flex;
           }
         }
 

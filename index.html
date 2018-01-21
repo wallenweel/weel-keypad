@@ -1,148 +1,123 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <title>Weel Keypad Demo</title>
-
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <main class="container">
-      <div class="page-header">
-        <h1>Weel Keypad's Demos</h1>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Weel Keypad Demos</title>
+  <link href="https://cdn.bootcss.com/material-design-icons/3.0.1/iconfont/material-icons.css" rel="stylesheet">
+  <link href="https://cdn.bootcss.com/material-design-lite/1.3.0/material.blue-lime.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcss.com/material-design-lite/1.3.0/material-grid.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcss.com/prism/9000.0.1/themes/prism.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Always shows a header, even in smaller screens. -->
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row">
+        <!-- Title -->
+        <span class="mdl-layout-title">Weel Keypad 使用示例</span>
+        <!-- Add spacer, to align navigation to the right -->
+        <div class="mdl-layout-spacer"></div>
+        <!-- Navigation. We hide it in small screens. -->
+        <nav class="mdl-navigation mdl-layout--large-screen-only">
+          <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad#%E5%AE%89%E8%A3%85">下载</a>
+          <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E">API 文档</a>
+          <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad">项目地址</a>
+          <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad/issues">反馈问题</a>
+        </nav>
       </div>
+    </header>
+    <div class="mdl-layout__drawer">
+      <span class="mdl-layout-title">Weel Keypad</span>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad#%E5%AE%89%E8%A3%85">下载</a>
+        <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E">API 文档</a>
+        <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad">项目地址</a>
+        <a class="mdl-navigation__link" target="_blank" href="https://github.com/wallenweel/weel-keypad/issues">反馈问题</a>
+      </nav>
+    </div>
 
+    <main class="mdl-layout__content">
+      <div class="mdl-grid page-content">
 
-      <h4>Listening Input Element's "focus/blur" Event</h4>
-      <div class="input-group input-group">
-        <span class="input-group-addon">Focus / Blur</span>
-        <input type="text" class="form-control js-normal-input" placeholder="Type here." aria-describedby="sizing-addon1">
-      </div>
-      <pre><code>
-new Keypad({
-  el: document.querySelector('input.js-normal-input'),
-  mobile: isMobile
+        <div id="base" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">最基本的用法</h2>
+          </div>
+          <div class="mdl-card__supporting-text">
+            不需要任何额外的参数就可以将一个初始状态的“键盘”载入到页面中，点击动作栏的按钮操作显示/隐藏。
+          </div>
+          <div class="mdl-card__supporting-text">
+<pre><code class="language-javascript">
+// 使用 new 操作符得到一个实例
+var kypd = new Keypad()
+
+kypd.toggle() // 切换
+kypd.show() // 显示
+kypd.hide() // 隐藏
+</code></pre>
+          </div>
+          <div class="mdl-card__actions mdl-card--border">
+            <a class="js-toggle mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              切换
+            </a>
+            <a class="js-show mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              显示
+            </a>
+            <a class="js-hide mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              隐藏
+            </a>
+          </div>
+        </div>
+
+        <div id="listen" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">绑定 & 监听 <code>input</code> 元素</h2>
+          </div>
+          <div class="mdl-card__supporting-text">
+            使用 Keypad 不会阻止移动端浏览器对于 <code>input</code> 元素的默认事件而导致行为或者
+            显示异常（放大输入框、元素漂移），需要避免这种的话建议设置 'readonly'，具体参考下一示例。
+          </div>
+          <div class="mdl-card__supporting-text">
+            <form action="#">
+              <div class="mdl-textfield mdl-js-textfield">
+                <input
+                  id="listened-input" class="mdl-textfield__input" type="text"
+                  placeholder="#listened-input">
+              </div>
+            </form>
+          </div>
+          <div class="mdl-card__supporting-text">
+<pre><code class="language-javascript">
+// 使用 new 操作符得到一个实例
+var kypd = new Keypad({
+  // 需要监听的 input 元素选择器
+  el: '#listened-input'
 })
-      </code></pre>
+</code></pre>
+          </div>
+          <div class="mdl-card__actions mdl-card--border">
+            <a class="js-toggle mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              切换
+            </a>
+            <a class="js-show mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              显示
+            </a>
+            <a class="js-hide mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              隐藏
+            </a>
+          </div>
+        </div>
 
-
-      <h4>Manually Control</h4>
-      <div class="input-group input-group">
-        <span class="input-group-btn">
-          <button class="btn btn-default js-toggle-keypad" type="button">Toggle</button>
-          <button class="btn btn-default js-show-keypad" type="button">Show</button>
-          <button class="btn btn-default js-hide-keypad" type="button">Hide</button>
-        </span>
-        <input type="text" class="form-control js-toggle-input" placeholder="Waiting...">
+        <div style="min-height: 460px; width: 100%;"></div>
       </div>
-
-      <pre><code>
-const keypad2 = new Keypad({
-  input: document.querySelector('input.js-toggle-input'),
-  mobile: isMobile
-})
-
-document.querySelector('button.js-toggle-keypad')
-  .addEventListener('click', ev => { keypad2.toggle() }, false)
-
-document.querySelector('button.js-show-keypad')
-  .addEventListener('click', ev => { keypad2.show() }, false)
-
-document.querySelector('button.js-hide-keypad')
-  .addEventListener('click', ev => { keypad2.hide() }, false)          
-      </code></pre>
-
-
-      <h4>Handling Keypad Key Events & Modify Elements</h4>
-      <div class="input-group input-group">
-        <button class="btn btn-default js-toggle-keypad2" type="button">Toggle</button>
-        <span style="margin-left: 16px;"> <span class="js-toggle-keypad2-v">none</span></span>
-      </div>
-      <pre><code>
-const keypad3 = new Keypad({
-  mobile: isMobile,
-  show: false,
-  name: 'qwer',
-  reducer: {
-    key (target) {
-      if (target.textContent === 'Space') {
-        target.textContent = '空 格'
-      }
-      return target
-    }
-  },
-  onstart ([text, value, code], ev) {
-    console.log(this, ev)
-  },
-  onend ([text, value, code]) {
-    console.log(text, value, code)
-
-    document.querySelector('.js-toggle-keypad2-v').textContent = value
-  }
-})
-
-document.querySelector('button.js-toggle-keypad2')
-  .addEventListener('click', ev => { keypad3.toggle() }, false)
-      </code></pre>
-
-
-      <h4>6 Numbers Password</h4>
-      <div class="input-group input-group">
-        <div class="passwords js-show-keypad-password"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <input type="text" class="form-control js-readonly-input" placeholder="Waiting..." readonly>        
-      </div>
-      <pre><code>
-const keypad4 = new Keypad({
-  input: document.querySelector('input.js-readonly-input'),
-  mobile: isMobile,
-  onend ([, , code]) {
-    const i = document.querySelector('input.js-readonly-input').value.length
-    const items = document.querySelectorAll('.js-show-keypad-password > i')
-
-    if (code === 'backspace') {
-      if (!i) {
-        keypad4.hide()
-
-        return false
-      }
-
-      items[i - 1].classList.remove('on')
-
-      return false
-    }
-
-    if (i >= items.length) {
-      keypad4.hide()
-
-      return true
-    }
-
-    items[i].classList.add('on')
-  }
-})
-
-document.querySelector('.js-show-keypad-password')
-  .addEventListener('click', ev => { keypad4.show() }, false)
-      </code></pre>
     </main>
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-    <script src="dist/keypad.js"></script>
-    <script src="dist/index.js"></script>
-  </body>
+  </div>
+  
+  <script src="https://cdn.bootcss.com/material-design-lite/1.3.0/material.min.js"></script>
+  <script src="https://cdn.bootcss.com/prism/9000.0.1/prism.min.js"></script>
+  <script src="dist/keypad.js"></script>
+  <script src="dist/index.js"></script>
+</body>
 </html>

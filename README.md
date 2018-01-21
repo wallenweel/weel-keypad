@@ -14,7 +14,7 @@
 
 > 只是在浏览器环境引用的话，使用第一种方式，支持 require.js 加载。
 
-+ 切换至 **master** 分支下载 [`dist/keypad.min.js`](tree/master/dist/keypad.min.js) 用于浏览器环境的打包
++ 切换至 **master** 分支 [下载 `dist/keypad.min.js`](tree/master/dist/keypad.min.js) 用于浏览器环境的打包
 + NPM 下载
 ```bash
 npm i weel-translate
@@ -39,11 +39,12 @@ npm i weel-translate
 - [ ] 添加定制化的工具条
 - [x] Flex 方式布局
 - [ ] Float 布局选项（Legacy 兼容）
-- [x] 响应正常的可编辑元素（input、div[contenteditable]）
+- [x] 响应正常的 input 元素
 - [x] 按需叫出键盘
 - [x] 支持桌面端鼠标事件
 - [x] 支持 SVG 图片作为按键
 - [x] 支持键盘切换
+- [ ] 支持 contenteditable 属性元素
 
 
 ## 使用说明
@@ -55,12 +56,14 @@ npm i weel-translate
 /** 使用 new 操作符进行实例化 */
 const kypd = new Keypad(options, [, layouts, maps])
 
+// 对象字面量形式
 const object = new Keypad(
   { show: true }, // options
   { qwer: ['...'] }, // layouts
   { upper: 'caps_lock' } // maps
 )
 
+// 回调函数形式
 const callback = new Keypad(
   options => {
     options.show = true
@@ -80,7 +83,7 @@ const callback = new Keypad(
 ### 配置选项 `options`
 ```javascript
 export const defaultOptions = {
-  // 可以响应 “focus|blur” 事件的元素，例如，<input type="text">、<div contenteditable>
+  // 可以响应 “focus|blur” 事件的 input 元素
   // 支持 selector 字符串，使用 querySelectorAll 查找 DOMs
   el: null, // {HTMLElement|NodeList|String}
 
@@ -91,6 +94,7 @@ export const defaultOptions = {
   flex: true, // {Boolean}
 
   // 默认 true 使用 touch 相关事件，false 使用 mouse 相关事件
+  // 如果需要给多个实例统一修改的话，可以在引入后使用 'Keypad.isMobile=<Boolean>'
   mobile: true, // {Boolean}
 
   // 按键按下时触发回调函数，数组参数： [text, value, code]

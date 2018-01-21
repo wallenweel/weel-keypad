@@ -19,6 +19,8 @@ export default class Keypad {
     if (typeof layouts === 'function') layouts = layouts(Object.assign({}, defaultLayouts))
     if (typeof maps === 'function') maps = maps(Object.assign({}, defaultMaps))
 
+    options.mobile = Keypad.isMobile
+
     this.options = Object.assign({}, defaultOptions, options)
     this.layouts = Object.assign({}, defaultLayouts, layouts)
     this.maps = Object.assign({}, defaultMaps, maps)
@@ -178,8 +180,8 @@ export default class Keypad {
     }
 
     if (!keyCode && this.locked === this.maps['upper']) {
-      keyText = keyText && keyText.toUpperCase()
-      keyValue = keyValue && keyValue.toUpperCase()
+      keyText = keyText && ('' + keyText).toUpperCase()
+      keyValue = keyValue && ('' + keyValue).toUpperCase()
     }
 
     this.keyMap(when, keyValue, keyCode)
@@ -248,24 +250,34 @@ export default class Keypad {
   }
 
   keyInput (value, code) {
-    if (!this.input) return true
+    if (
+      !this.input || (
+        !(value === 0 ? '0' : value) &&
+        code !== this.maps['backspace']
+      )
+    ) return true
 
-    let v = this.input.value
-    let s = this.input.selectionStart
+    let _value = this.input.value
+    let start = this.input.selectionStart
+    let end = this.input.selectionEnd
 
-    if (v && code === this.maps['backspace']) {
-      v = v.slice(0, s - 1) + v.slice(s)
-      s--
+    if ((end - start)) {
+      _value = _value.slice(0, start) + _value.slice(end)
+    }
+
+    if (_value && code === this.maps['backspace'] && !(end - start)) {
+      _value = _value.slice(0, start - 1) + _value.slice(start)
+      start--
     }
 
     const type = Keypad.istype(value)
     if (type !== 'null' && type !== 'undefined') {
-      v = v.slice(0, s) + value + v.slice(s)
-      s++
+      _value = _value.slice(0, start) + value + _value.slice(start)
+      start++
     }
 
-    this.input.value = v
-    this.input.selectionEnd = s
+    this.input.value = _value
+    this.input.selectionEnd = start
   }
 
   render (layouts = this.layouts) {

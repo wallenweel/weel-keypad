@@ -1,88 +1,45 @@
-import './src/styles/demo.scss'
-
-const isMobile = /Mobile/.test(navigator.userAgent)
-
 /* global Keypad */
+Keypad.isMobile = /Mobile/.test(navigator.userAgent)
 
-// demo 1
-/* eslint-disable no-new */
-new Keypad({
-  el: document.querySelector('input.js-normal-input'),
-  mobile: isMobile
+demo('base', () => {
+  var kypd = new Keypad()
+
+  // kypd.toggle()
+  // kypd.show()
+  // kypd.hide()
+
+  return kypd
 })
 
-// demo 2
-const keypad2 = new Keypad({
-  input: document.querySelector('input.js-toggle-input'),
-  mobile: isMobile
+demo('listen', () => {
+  var kypd = new Keypad({
+    el: '#listened-input'
+  })
+
+  return kypd
 })
 
-document.querySelector('button.js-toggle-keypad')
-  .addEventListener('click', ev => { keypad2.toggle() }, false)
+function demo (id, cb) {
+  const demo = document.querySelector(`#${id}`)
 
-document.querySelector('button.js-show-keypad')
-  .addEventListener('click', ev => { keypad2.show() }, false)
+  if (!demo) return false
 
-document.querySelector('button.js-hide-keypad')
-  .addEventListener('click', ev => { keypad2.hide() }, false)
-
-// demo 3
-const keypad3 = new Keypad({
-  mobile: isMobile,
-  show: true,
-  name: 'number',
-  hide: true,
-  reducer: {
-    key (target) {
-      if (target.textContent === 'Space') {
-        target.childNodes[0].textContent = '空 格'
-      }
-      return target
-    }
-  },
-  onstart ([text, value, code], ev) {
-    console.log(this, ev)
-  },
-  onend ([text, value, code]) {
-    console.log(text, value, code)
-
-    document.querySelector('.js-toggle-keypad2-v').textContent = value
+  const buttons = {
+    show: demo.querySelector('.js-show'),
+    hide: demo.querySelector('.js-hide'),
+    toggle: demo.querySelector('.js-toggle')
   }
-})
 
-document.querySelector('button.js-toggle-keypad2')
-  .addEventListener('click', ev => { ev.stopPropagation(); keypad3.toggle() }, false)
+  const keypad = cb.call(demo)
 
-// demo 4
-const keypad4 = new Keypad({
-  input: document.querySelector('input.js-readonly-input'),
-  mobile: isMobile,
-  multiple: false,
-  onend ([, , code]) {
-    const i = document.querySelector('input.js-readonly-input').value.length
-    const items = document.querySelectorAll('.js-show-keypad-password > i')
+  if (!keypad) return false
 
-    if (code === 'backspace') {
-      if (!i) {
-        keypad4.hide()
+  for (const [action, button] of Object.entries(buttons)) {
+    if (!button) continue
 
-        return false
-      }
-
-      items[i - 1].classList.remove('on')
-
-      return false
-    }
-
-    if (i >= items.length) {
-      keypad4.hide()
-
-      return true
-    }
-
-    items[i].classList.add('on')
+    button.addEventListener('click', ev => {
+      ev.stopPropagation()
+      keypad[action]()
+    }, false)
   }
-})
-
-document.querySelector('.js-show-keypad-password')
-  .addEventListener('click', ev => { keypad4.show() }, false)
+}
