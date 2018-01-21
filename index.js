@@ -30,7 +30,8 @@ document.querySelector('button.js-hide-keypad')
 const keypad3 = new Keypad({
   mobile: isMobile,
   show: true,
-  name: 'qwer',
+  name: 'number',
+  hide: true,
   reducer: {
     key (target) {
       if (target.textContent === 'Space') {
@@ -50,7 +51,7 @@ const keypad3 = new Keypad({
 })
 
 document.querySelector('button.js-toggle-keypad2')
-  .addEventListener('click', ev => { keypad3.toggle() }, false)
+  .addEventListener('click', ev => { ev.stopPropagation(); keypad3.toggle() }, false)
 
 // demo 4
 const keypad4 = new Keypad({

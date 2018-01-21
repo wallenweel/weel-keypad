@@ -49,10 +49,32 @@ npm i weel-translate
 ## 使用说明
 
 > 实例化所需的所有选项都是可选的，根据需求进行配置即可。
+> 支持传入回调函数来修改默认配置，参数为对应的默认参数。
 
 ```javascript
 /** 使用 new 操作符进行实例化 */
 const kypd = new Keypad(options, [, layouts, maps])
+
+const object = new Keypad(
+  { show: true }, // options
+  { qwer: ['...'] }, // layouts
+  { upper: 'caps_lock' } // maps
+)
+
+const callback = new Keypad(
+  options => {
+    options.show = true
+    return options
+  },
+  layouts => {
+    layouts.qwer = ['...']
+    return layouts
+  },
+  maps => {
+    maps.upper = 'caps_lock'
+    return maps
+  }
+)
 ```
 
 ### 配置选项 `options`
@@ -79,6 +101,9 @@ export const defaultOptions = {
 
   // true 为载入后立即显示
   show: false, // {Boolean}
+
+  // 点击键盘区域以外的页面部分时隐藏键盘，支持修改事件名， 默认为“click”
+  hide: false, // {Boolean|String}
 
   // 默认显示的键盘布局，默认数字键盘，可用值：number, qwer
   name: 'number', // {String}
@@ -111,7 +136,7 @@ export const defaultOptions = {
 
   // 使用 appendChild 方法注入键盘的位置，默认为 body
   // 值为 falsy 的话则只渲染不注入到页面中，之后手动调用 keypad.inject()
-  inject: document.body // {HTMLElement?}
+  body: document.body // {HTMLElement?}
 }
 ```
 

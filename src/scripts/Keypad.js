@@ -11,24 +11,32 @@ import * as images from '../images'
  * @param {Object} maps user maps
  */
 export default class Keypad {
-  constructor (options = {}, layouts = {}, maps = {}) {
+  // constructor (options = {}, layouts = {}, maps = {}) {
+  constructor (...configs) {
+    let [options = {}, layouts = {}, maps = {}] = configs
+
+    if (typeof options === 'function') options = options(Object.assign({}, defaultOptions))
+    if (typeof layouts === 'function') layouts = layouts(Object.assign({}, defaultLayouts))
+    if (typeof maps === 'function') maps = maps(Object.assign({}, defaultMaps))
+
     this.options = Object.assign({}, defaultOptions, options)
     this.layouts = Object.assign({}, defaultLayouts, layouts)
     this.maps = Object.assign({}, defaultMaps, maps)
 
-    const { el, input, show, inject } = this.options
+    const { el, input, show, hide, body } = this.options
 
     this.input = input || null
     this.wrap = null
-    this.parent = inject || null
+    this.parent = body || null
 
     this.keypads = {}
     this.hightlight = null
     this.locked = null
 
     if (el) this.listen()
-    if (inject) this.inject()
+    if (body) this.inject()
     if (show) this.show()
+    if (hide) this.bodyHide()
   }
 
   get events () {
@@ -245,7 +253,7 @@ export default class Keypad {
     let v = this.input.value
     let s = this.input.selectionStart
 
-    if (v && code === 'backspace') {
+    if (v && code === this.maps['backspace']) {
       v = v.slice(0, s - 1) + v.slice(s)
       s--
     }
@@ -292,15 +300,20 @@ export default class Keypad {
     wrap.setAttribute(this.prefix('attr', 'theme'), theme)
     wrap.setAttribute(this.prefix('attr', 'dark'), dark)
 
+    wrap.addEventListener(this.events.start,
+      ev => ev.stopPropagation() || ev.preventDefault(),
+      false
+    )
+
     this.wrap = this.reducer('wrap')(wrap)
 
     return this.wrap
   }
 
   inject (target) {
-    const { inject, name, multiple } = this.options
+    const { body, name, multiple } = this.options
 
-    const wrap = target || inject
+    const wrap = target || body
 
     wrap.appendChild(
       this.render(multiple ? this.layouts : { [name]: this.layouts[name] })
@@ -351,6 +364,19 @@ export default class Keypad {
         this.hide()
       }, false)
     })
+  }
+
+  bodyHide (ev, flag = this.options['hide']) {
+    if (!flag) return false
+
+    const _flag = typeof flag === 'string' ? flag : 'click'
+
+    document.body.addEventListener(_flag, ev => this.hide(), false)
+
+    this.wrap.addEventListener(_flag,
+      ev => ev.stopPropagation() || ev.preventDefault(),
+      false
+    )
   }
 
   show (name = this.options['name']) {
