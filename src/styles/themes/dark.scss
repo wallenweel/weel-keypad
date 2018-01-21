@@ -9,6 +9,10 @@ $primary-dark: #2a2d33;
     background-color: $dark;
 
     #{$flex}, #{$float} {
+      &container {
+        border-top: 1px #111417 solid;
+      }
+
       &key {
         > span {
           background-color: $dark;

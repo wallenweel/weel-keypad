@@ -76,7 +76,7 @@ kypd.hide() // 隐藏
             <h2 class="mdl-card__title-text">绑定 & 监听 <code>input</code> 元素</h2>
           </div>
           <div class="mdl-card__supporting-text">
-            使用 Keypad 不会阻止移动端浏览器对于 <code>input</code> 元素的默认事件而导致行为或者
+            激活下面的输入框触发键盘。提示： Keypad 不会阻止移动端浏览器对于 <code>input</code> 元素的默认事件而导致行为或者
             显示异常（放大输入框、元素漂移），需要避免这种的话建议设置 'readonly'，具体参考下一示例。
           </div>
           <div class="mdl-card__supporting-text">
@@ -97,16 +97,191 @@ var kypd = new Keypad({
 })
 </code></pre>
           </div>
-          <div class="mdl-card__actions mdl-card--border">
-            <a class="js-toggle mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-              切换
-            </a>
-            <a class="js-show mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-              显示
-            </a>
-            <a class="js-hide mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-              隐藏
-            </a>
+        </div>
+
+        <div id="input" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">绑定存值的 <code>input</code> 元素</h2>
+          </div>
+          <div class="mdl-card__supporting-text">
+            点击下面的六位数密码框会激活键盘，输入的值则会被存入它下方那个只读属性的 input 中。
+          </div>
+          <div class="mdl-card__supporting-text">
+            <form action="#">
+              <div id="password" class="kypd-passwords js-show-keypad-password"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="mdl-textfield mdl-js-textfield">
+                <input
+                  id="readonly-input" class="mdl-textfield__input" type="text"
+                  readonly
+                  placeholder="#readonly-input(readonly)">
+              </div>
+            </form>
+          </div>
+          <div class="mdl-card__supporting-text">
+<pre><code class="language-javascript">
+var input = document.querySelector('#readonly-input')
+var password = document.querySelector('#password')
+var items = password.querySelectorAll('i')
+var kypd = new Keypad({
+  input: input,
+  onend: function (key) {
+    var code = key[2]
+    var n = input.value.length + 1
+
+    if (code === 'backspace') {
+      n--
+
+      if (n === 0) return kypd.hide()
+      if (n > items.length) n = items.length - 1
+
+      items[n - 1].classList.remove('on')
+
+      return false
+    }
+
+    if (n > items.length) {
+      kypd.hide()
+      return true
+    }
+
+    if (n === items.length) {
+      items[n - 1].classList.add('on')
+      return kypd.hide()
+    }
+
+    items[n - 1].classList.add('on')
+  }
+})
+
+password.addEventListener('click', ev => kypd.show(), false)
+</code></pre>
+          </div>
+        </div>
+
+        <div id="options" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">其它选项</h2>
+          </div>
+          <div class="mdl-card__supporting-text">
+            在此页面进行一些选项的演示，可结合浏览器的控制台查看对应的 HTML 结构。
+          </div>
+          <div class="mdl-card__supporting-text">
+            <h5 style="display: inline-block;">按键名称：</h5>
+            <span id="options-print-1">等待……</span>
+            <h5 style="display: inline-block;">按键值：</h5>
+            <span id="options-print-2">等待……</span>
+            <h5 style="display: inline-block;">按键命令：</h5>
+            <span id="options-print-3">等待……</span>
+          </div>
+          <div class="mdl-card__supporting-text">
+            <h4 style="margin-top: 0;">主题颜色</h4>
+            <div class="kypd-theme">
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="theme-color-1">
+                <input type="radio" id="theme-color-1" class="mdl-radio__button" name="theme-color" value="1" checked>
+                <span class="mdl-radio__label">暗色</span>
+              </label>
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="theme-color-2">
+                <input type="radio" id="theme-color-2" class="mdl-radio__button" name="theme-color" value="0">
+                <span class="mdl-radio__label">浅色</span>
+              </label>
+            </div>
+
+
+            <h4>控制显示</h4>
+            <div class="kypd-control">
+              <button id="control-1" class="mdl-button mdl-js-button mdl-button--raised">
+                切换
+              </button>
+              <button id="control-2" class="mdl-button mdl-js-button mdl-button--raised">
+                显示
+              </button>
+              <button id="control-3" class="mdl-button mdl-js-button mdl-button--raised">
+                隐藏
+              </button>
+            </div>
+            
+            <h4>切换键盘</h4>
+            <div class="kypd-layout">
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="layout-1">
+                <input type="radio" id="layout-1" class="mdl-radio__button" name="layout" value="number">
+                <span class="mdl-radio__label">数字九宫格</span>
+              </label>
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="layout-2">
+                <input type="radio" id="layout-2" class="mdl-radio__button" name="layout" value="qwer" checked>
+                <span class="mdl-radio__label">简略 QWER</span>
+              </label>
+            </div>
+          </div>
+          <div class="mdl-card__supporting-text">
+<pre><code class="language-javascript">
+// 使用回调函数的方式配置选项来实例化 Keypad
+var kypd = new Keypad(function (options) {
+  options.dark = true // 使用深色主题
+  options.name = 'qwer' // 键盘布局修改为 QWER
+  options.hide = true // 点击键盘区域以外的页面部分隐藏
+
+  // 绑定按键按下状态
+  options.onstart = function (key) {
+    id('options-print-1').textContent = key[0] // 文本
+    id('options-print-2').textContent = key[1] // 值
+    id('options-print-3').textContent = key[2] // 命令
+  }
+
+  // 返回修改后的选项
+  return options
+})
+
+var theme = {
+  dark: id('theme-color-1'),
+  light: id('theme-color-2')
+}
+
+Object.entries(theme).forEach(function (action) {
+  var name = action[0]
+  var target = action[1]
+
+  target.addEventListener('click', function (ev) {
+    ev.stopPropagation()
+    kypd.dark(name === 'dark')
+  }, false)
+})
+
+var control = {
+  toggle: id('control-1'),
+  show: id('control-2'),
+  hide: id('control-3')
+}
+
+Object.entries(control).forEach(function (action) {
+  var name = action[0]
+  var target = action[1]
+
+  target.addEventListener('click', function (ev) {
+    ev.stopPropagation()
+    kypd[name]()
+  }, false)
+})
+
+var layout = {
+  number: id('layout-1'),
+  qwer: id('layout-2')
+}
+
+Object.entries(layout).forEach(function (action) {
+  var name = action[0]
+  var target = action[1]
+
+  target.addEventListener('click', function (ev) {
+    ev.stopPropagation()
+    kypd.hide()
+    kypd.show(name)
+  }, false)
+})
+
+function id (id) {
+  return document.querySelector('#' + id)
+}
+</code></pre>
           </div>
         </div>
 

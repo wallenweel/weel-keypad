@@ -1,49 +1,55 @@
 @import "variables";
 
-main.container {
-  > h4 {
-    margin-top: 48px;
+.kypd-passwords {
+  display: flex;
+
+  + input {
+    margin-bottom: 12px;
   }
 
-  .passwords {
+  > i {
+    $sz: 32px;
+    border-radius: 4px;
+    // border: 1px solid #eee;
+    box-shadow: 0px 2px 4px 1px rgba(67, 186, 255, 0.383);
+    height: $sz;
+    width: $sz;
+    margin: 2px;
+    justify-content: center;
+    align-items: center;
     display: flex;
 
-    + input {
-      margin-bottom: 12px;
-    }
-
-    > i {
-      $sz: 32px;
-      border-radius: 4px;
-      border: 1px solid #eee;
+    &::before {
+      content: "";
+      $sz: 10px;
+      border-radius: $sz / 2;
+      background: #22cbff;
       height: $sz;
       width: $sz;
-      margin: 2px;
-      justify-content: center;
-      align-items: center;
-      display: flex;
+      display: block;
 
+      transition: opacity .25s ease, visibility .25s ease;
+      
+      opacity: .2;
+    }
+
+    &.on {
       &::before {
-        content: "";
-        $sz: 10px;
-        border-radius: $sz / 2;
-        background: #333333;
-        height: $sz;
-        width: $sz;
-        display: block;
-
-        transition: opacity .25s ease, visibility .25s ease;
-        
-        opacity: 0;
-        visibility: hidden;
-      }
-
-      &.on {
-        &::before {
-          opacity: 1;
-          visibility: visible;
-        }
+        opacity: 1;
       }
     }
+  }
+}
+
+.kypd-theme,
+.kypd-layout {
+  label {
+    margin-right: 12px;
+  }
+}
+
+.kypd-control {
+  button {
+    margin-right: 12px;
   }
 }
