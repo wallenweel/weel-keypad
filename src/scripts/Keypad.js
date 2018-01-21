@@ -11,24 +11,34 @@ import * as images from '../images'
  * @param {Object} maps user maps
  */
 export default class Keypad {
-  constructor (options = {}, layouts = {}, maps = {}) {
+  // constructor (options = {}, layouts = {}, maps = {}) {
+  constructor (...configs) {
+    let [options = {}, layouts = {}, maps = {}] = configs
+
+    if (typeof options === 'function') options = options(Object.assign({}, defaultOptions))
+    if (typeof layouts === 'function') layouts = layouts(Object.assign({}, defaultLayouts))
+    if (typeof maps === 'function') maps = maps(Object.assign({}, defaultMaps))
+
+    options.mobile = Keypad.isMobile
+
     this.options = Object.assign({}, defaultOptions, options)
     this.layouts = Object.assign({}, defaultLayouts, layouts)
     this.maps = Object.assign({}, defaultMaps, maps)
 
-    const { el, input, show, inject } = this.options
+    const { el, input, show, hide, body } = this.options
 
     this.input = input || null
     this.wrap = null
-    this.parent = inject || null
+    this.parent = body || null
 
     this.keypads = {}
     this.hightlight = null
     this.locked = null
 
     if (el) this.listen()
-    if (inject) this.inject()
+    if (body) this.inject()
     if (show) this.show()
+    if (hide) this.bodyHide()
   }
 
   get events () {
@@ -77,9 +87,12 @@ export default class Keypad {
   }
 
   generator (layout) {
+    const { multiple } = this.options
+
     const content = this.createElement('content')
-    const key = this.createElement('key')
     const keyRow = this.createElement('key-row')
+    const key = this.createElement('key')
+    const span = document.createElement('span')
 
     const rowReducer = this.reducer('row')
     const keyReducer = this.reducer('key')
@@ -89,6 +102,7 @@ export default class Keypad {
 
       for (let [keyText, keyValue, keyCode] of group) {
         const _key = key.cloneNode()
+        const _span = span.cloneNode()
 
         if (/svg\[.+\]/.test(keyText)) {
           const name = keyText.match(/svg\[(.+)\]/)[1]
@@ -102,14 +116,14 @@ export default class Keypad {
           const fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div')
           fake.innerHTML = svg
 
-          _key.appendChild(fake.querySelector('svg'))
+          _span.appendChild(fake.querySelector('svg'))
         } else if (/(<\/svg>[\s]?)$/.test(keyText)) {
           const fake = document.createElementNS('http://www.w3.org/1999/xhtml', 'div')
           fake.innerHTML = keyText
 
-          _key.appendChild(fake.querySelector('svg'))
+          _span.appendChild(fake.querySelector('svg'))
         } else {
-          _key.textContent = keyText
+          _span.textContent = keyText
         }
 
         if (keyValue || (!keyValue && !keyCode)) {
@@ -117,7 +131,13 @@ export default class Keypad {
           _key.setAttribute(this.prefix('attr', 'key-value'), keyValue || keyText)
         }
 
-        if (keyCode) _key.setAttribute(this.prefix('attr', 'key-code'), keyCode)
+        if (keyCode) {
+          if (!multiple && /^@@/.test(keyCode + '')) {
+            continue
+          }
+
+          _key.setAttribute(this.prefix('attr', 'key-code'), keyCode)
+        }
 
         _key.setAttribute(this.prefix('attr', 'status'), '')
 
@@ -131,6 +151,7 @@ export default class Keypad {
           false
         )
 
+        _key.appendChild(_span)
         _keyRow.appendChild(keyReducer(_key))
       }
 
@@ -159,8 +180,8 @@ export default class Keypad {
     }
 
     if (!keyCode && this.locked === this.maps['upper']) {
-      keyText = keyText && keyText.toUpperCase()
-      keyValue = keyValue && keyValue.toUpperCase()
+      keyText = keyText && ('' + keyText).toUpperCase()
+      keyValue = keyValue && ('' + keyValue).toUpperCase()
     }
 
     this.keyMap(when, keyValue, keyCode)
@@ -229,24 +250,34 @@ export default class Keypad {
   }
 
   keyInput (value, code) {
-    if (!this.input) return true
+    if (
+      !this.input || (
+        !(value === 0 ? '0' : value) &&
+        code !== this.maps['backspace']
+      )
+    ) return true
 
-    let v = this.input.value
-    let s = this.input.selectionStart
+    let _value = this.input.value
+    let start = this.input.selectionStart
+    let end = this.input.selectionEnd
 
-    if (v && code === 'backspace') {
-      v = v.slice(0, s - 1) + v.slice(s)
-      s--
+    if ((end - start)) {
+      _value = _value.slice(0, start) + _value.slice(end)
+    }
+
+    if (_value && code === this.maps['backspace'] && !(end - start)) {
+      _value = _value.slice(0, start - 1) + _value.slice(start)
+      start--
     }
 
     const type = Keypad.istype(value)
     if (type !== 'null' && type !== 'undefined') {
-      v = v.slice(0, s) + value + v.slice(s)
-      s++
+      _value = _value.slice(0, start) + value + _value.slice(start)
+      start++
     }
 
-    this.input.value = v
-    this.input.selectionEnd = s
+    this.input.value = _value
+    this.input.selectionEnd = start
   }
 
   render (layouts = this.layouts) {
@@ -281,15 +312,20 @@ export default class Keypad {
     wrap.setAttribute(this.prefix('attr', 'theme'), theme)
     wrap.setAttribute(this.prefix('attr', 'dark'), dark)
 
+    wrap.addEventListener(this.events.start,
+      ev => ev.stopPropagation() || ev.preventDefault(),
+      false
+    )
+
     this.wrap = this.reducer('wrap')(wrap)
 
     return this.wrap
   }
 
   inject (target) {
-    const { inject, name, multiple } = this.options
+    const { body, name, multiple } = this.options
 
-    const wrap = target || inject
+    const wrap = target || body
 
     wrap.appendChild(
       this.render(multiple ? this.layouts : { [name]: this.layouts[name] })
@@ -340,6 +376,19 @@ export default class Keypad {
         this.hide()
       }, false)
     })
+  }
+
+  bodyHide (ev, flag = this.options['hide']) {
+    if (!flag) return false
+
+    const _flag = typeof flag === 'string' ? flag : 'click'
+
+    document.body.addEventListener(_flag, ev => this.hide(), false)
+
+    this.wrap.addEventListener(_flag,
+      ev => ev.stopPropagation() || ev.preventDefault(),
+      false
+    )
   }
 
   show (name = this.options['name']) {

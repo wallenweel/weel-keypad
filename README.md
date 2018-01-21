@@ -12,12 +12,13 @@
 
 ## 安装
 
+> 只是在浏览器环境引用的话，使用第一种方式，支持 require.js 加载。
+
++ 切换至 **master** 分支 [下载 `dist/keypad.min.js`](tree/master/dist/keypad.min.js) 用于浏览器环境的打包
 + NPM 下载
 ```bash
 npm i weel-translate
 ```
-
-+ 切换至 **master** 分支下载 `dist/weel-keypad.min.js` 用于浏览器环境的打包
 + 克隆 **develop** 分支到本地，按照 [构建项目](#构建项目) 部分打包文件
 
 
@@ -38,26 +39,51 @@ npm i weel-translate
 - [ ] 添加定制化的工具条
 - [x] Flex 方式布局
 - [ ] Float 布局选项（Legacy 兼容）
-- [x] 响应正常的可编辑元素（input、div[contenteditable]）
+- [x] 响应正常的 input 元素
 - [x] 按需叫出键盘
 - [x] 支持桌面端鼠标事件
 - [x] 支持 SVG 图片作为按键
 - [x] 支持键盘切换
+- [ ] 支持 contenteditable 属性元素
 
 
 ## 使用说明
 
 > 实例化所需的所有选项都是可选的，根据需求进行配置即可。
+> 支持传入回调函数来修改默认配置，参数为对应的默认参数。
 
 ```javascript
 /** 使用 new 操作符进行实例化 */
 const kypd = new Keypad(options, [, layouts, maps])
+
+// 对象字面量形式
+const object = new Keypad(
+  { show: true }, // options
+  { qwer: ['...'] }, // layouts
+  { upper: 'caps_lock' } // maps
+)
+
+// 回调函数形式
+const callback = new Keypad(
+  options => {
+    options.show = true
+    return options
+  },
+  layouts => {
+    layouts.qwer = ['...']
+    return layouts
+  },
+  maps => {
+    maps.upper = 'caps_lock'
+    return maps
+  }
+)
 ```
 
 ### 配置选项 `options`
 ```javascript
 export const defaultOptions = {
-  // 可以响应 “focus|blur” 事件的元素，例如，<input type="text">、<div contenteditable>
+  // 可以响应 “focus|blur” 事件的 input 元素
   // 支持 selector 字符串，使用 querySelectorAll 查找 DOMs
   el: null, // {HTMLElement|NodeList|String}
 
@@ -68,6 +94,7 @@ export const defaultOptions = {
   flex: true, // {Boolean}
 
   // 默认 true 使用 touch 相关事件，false 使用 mouse 相关事件
+  // 如果需要给多个实例统一修改的话，可以在引入后使用 'Keypad.isMobile=<Boolean>'
   mobile: true, // {Boolean}
 
   // 按键按下时触发回调函数，数组参数： [text, value, code]
@@ -79,10 +106,13 @@ export const defaultOptions = {
   // true 为载入后立即显示
   show: false, // {Boolean}
 
+  // 点击键盘区域以外的页面部分时隐藏键盘，支持修改事件名， 默认为“click”
+  hide: false, // {Boolean|String}
+
   // 默认显示的键盘布局，默认数字键盘，可用值：number, qwer
   name: 'number', // {String}
 
-  // 是否渲染多键盘，false 为只渲染 “name” 指定的键盘
+  // 是否渲染多键盘，false 为只渲染 “name” 指定的键盘并且隐藏切换"@@"键盘按钮
   multiple: true, // {Boolean}
 
   // 替换程序的渲染方法, 参数：layouts
@@ -110,7 +140,7 @@ export const defaultOptions = {
 
   // 使用 appendChild 方法注入键盘的位置，默认为 body
   // 值为 falsy 的话则只渲染不注入到页面中，之后手动调用 keypad.inject()
-  inject: document.body // {HTMLElement?}
+  body: document.body // {HTMLElement?}
 }
 ```
 

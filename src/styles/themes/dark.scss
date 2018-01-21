@@ -9,16 +9,22 @@ $primary-dark: #2a2d33;
     background-color: $dark;
 
     #{$flex}, #{$float} {
-      &key {
-        background-color: $dark;
-        box-shadow: 0 1px 2px rgba(63, 84, 107, 0.431);
+      &container {
+        border-top: 1px #111417 solid;
+      }
 
-        &[#{$data}status="start"] {
+      &key {
+        > span {
+          background-color: $dark;
+          box-shadow: 0 1px 2px rgba(63, 84, 107, 0.431);
+        }
+
+        &[#{$data}status="start"] > span {
           background-color: $primary-light;
           color: $dark;
         }
 
-        &[#{$data}key-code="enter"] {
+        &[#{$data}key-code="enter"] > span {
           background-color: $primary-light;
           color: $dark;
         }

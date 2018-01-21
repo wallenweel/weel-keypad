@@ -103,12 +103,12 @@
   }
 
   &key {
-    height: 48px;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-
-    flex: auto;
+    &, & > span {
+      align-items: center;
+      justify-content: center;
+      display: flex;
+  
+      flex: auto;
+    }
   }
 }
