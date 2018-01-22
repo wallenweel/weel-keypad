@@ -6,12 +6,11 @@ import * as images from '../images'
 /**
  * Keypad class
  *
- * @param {Object} options user options
- * @param {Object} layouts user layouts
- * @param {Object} maps user maps
+ * @param {Object?} options user options
+ * @param {Object?} layouts user layouts
+ * @param {Object?} maps user maps
  */
 export default class Keypad {
-  // constructor (options = {}, layouts = {}, maps = {}) {
   constructor (...configs) {
     let [options = {}, layouts = {}, maps = {}] = configs
 
@@ -19,11 +18,13 @@ export default class Keypad {
     if (typeof layouts === 'function') layouts = layouts(Object.assign({}, defaultLayouts))
     if (typeof maps === 'function') maps = maps(Object.assign({}, defaultMaps))
 
-    options.mobile = Keypad.isMobile
-
     this.options = Object.assign({}, defaultOptions, options)
     this.layouts = Object.assign({}, defaultLayouts, layouts)
     this.maps = Object.assign({}, defaultMaps, maps)
+
+    if (typeof Keypad.isMobile !== 'undefined') {
+      this.options.mobile = Keypad.isMobile
+    }
 
     const { el, input, show, hide, body } = this.options
 
@@ -41,6 +42,9 @@ export default class Keypad {
     if (hide) this.bodyHide()
   }
 
+  /**
+   * events according to device type
+   */
   get events () {
     const { mobile } = this.options
 
@@ -51,6 +55,12 @@ export default class Keypad {
     }
   }
 
+  /**
+   * prefix for Keypad elememnts and attributes
+   * @param {String} type 'elem' or 'attr'
+   * @param {String} name name of elem or attr
+   * @return {String} tag name or attribute's name
+   */
   prefix (type = 'elem', name = '') {
     const { flex } = this.options
 
@@ -60,6 +70,12 @@ export default class Keypad {
     }[type]
   }
 
+  /**
+   * createElement for custom element
+   * @param {String} name custom tag name
+   * @param {String} tag user's custom tag name
+   * @return {HTMLElement} created HTML element
+   */
   createElement (name = '', tag = this.options['tag']) {
     if (!tag) {
       return document.createElement(this.prefix('elem', name))
@@ -72,6 +88,11 @@ export default class Keypad {
     return _elem
   }
 
+  /**
+   * reducer for user modifing Keypad's elements
+   * @param {String} name Keypad custom element name
+   * @return {HTMLElement} reduced element
+   */
   reducer (name) {
     const { reducer } = this.options
 
@@ -86,6 +107,11 @@ export default class Keypad {
     return target => target
   }
 
+  /**
+   * generator for generating keypad's layout to HTML
+   * @param {Array} layout keypad's custom layout
+   * @return {HTMLElement} generated HTML
+   */
   generator (layout) {
     const { multiple } = this.options
 
@@ -161,6 +187,12 @@ export default class Keypad {
     return content
   }
 
+  /**
+   * handleKey for key's event listener
+   * @param {Event} ev key related event
+   * @param {String} when 'start' or 'end'
+   * @param {Array} key text and value and code
+   */
   handleKey (ev, when, [keyText, keyValue, keyCode]) {
     ev.preventDefault()
     ev.stopPropagation()
@@ -197,6 +229,12 @@ export default class Keypad {
     }
   }
 
+  /**
+   * keyMap for key's trigger map
+   * @param {String} when 'start' or 'end'
+   * @param {String?} value key's value
+   * @param {String?} code key's command code
+   */
   keyMap (when, value, code) {
     const { name } = this.options
 
@@ -249,6 +287,11 @@ export default class Keypad {
     }
   }
 
+  /**
+   * keyInput for key to set input value
+   * @param {String?} value key's value
+   * @param {String?} code key's command code
+   */
   keyInput (value, code) {
     if (
       !this.input || (
@@ -280,6 +323,11 @@ export default class Keypad {
     this.input.selectionEnd = start
   }
 
+  /**
+   * render for Keypad's rending
+   * @param {Object} layouts all keypad layouts
+   * @return {HTMLElement} rended Keypad HTML
+   */
   render (layouts = this.layouts) {
     const { render, theme, dark } = this.options
 
@@ -312,7 +360,7 @@ export default class Keypad {
     wrap.setAttribute(this.prefix('attr', 'theme'), theme)
     wrap.setAttribute(this.prefix('attr', 'dark'), dark)
 
-    wrap.addEventListener(this.events.start,
+    wrap.addEventListener(this.bodyEvent,
       ev => ev.stopPropagation() || ev.preventDefault(),
       false
     )
@@ -322,18 +370,25 @@ export default class Keypad {
     return this.wrap
   }
 
+  /**
+   * inject Keypad to the target node
+   * @param {Node} target the parent node to be injected
+   */
   inject (target) {
     const { body, name, multiple } = this.options
 
-    const wrap = target || body
+    const parent = target || body
 
-    wrap.appendChild(
+    parent.appendChild(
       this.render(multiple ? this.layouts : { [name]: this.layouts[name] })
     )
 
-    this.parent = wrap
+    this.parent = parent
   }
 
+  /**
+   * remove Keypad from the parent node
+   */
   remove () {
     if (this.wrap && this.parent) {
       return this.parent.removeChild(this.wrap)
@@ -342,6 +397,10 @@ export default class Keypad {
     return console.log('Has not found "Keypad" that needed to be removed.')
   }
 
+  /**
+   * listen input's focus and blur event
+   * @param {HTMLElement?} el HTMLElement or NodeList to be listend
+   */
   listen (el = this.options['el']) {
     if (!el) return false
 
@@ -378,19 +437,33 @@ export default class Keypad {
     })
   }
 
-  bodyHide (ev, flag = this.options['hide']) {
-    if (!flag) return false
+  /**
+   * bodyEvent to bodyHide
+   */
+  get bodyEvent () {
+    const { hide } = this.options
 
-    const _flag = typeof flag === 'string' ? flag : 'click'
+    return typeof hide === 'string' ? hide : this.events.start
+  }
 
-    document.body.addEventListener(_flag, ev => this.hide(), false)
+  /**
+   * bodyHide for tap body area except keypad wrap
+   */
+  bodyHide () {
+    document.body.addEventListener(this.bodyEvent, ev => {
+      this.hide()
+    }, false)
 
-    this.wrap.addEventListener(_flag,
+    this.wrap.addEventListener(this.bodyEvent,
       ev => ev.stopPropagation() || ev.preventDefault(),
       false
     )
   }
 
+  /**
+   * show keypad with a layout
+   * @param {String} name layout's name
+   */
   show (name = this.options['name']) {
     if (!this.layouts[name]) {
       console.error(`Has not a keypad layout named "${name}"`)
@@ -401,6 +474,10 @@ export default class Keypad {
     this.keypads[name].setAttribute(this.prefix('attr', 'status'), 'active')
   }
 
+  /**
+   * hide keypad with a layout
+   * @param {String} name layout's name
+   */
   hide (name = this.options['name']) {
     if (!this.layouts[name]) {
       console.error(`Has not a keypad layout named "${name}"`)
@@ -411,6 +488,10 @@ export default class Keypad {
     this.keypads[name].setAttribute(this.prefix('attr', 'status'), 'ready')
   }
 
+  /**
+   * toggle keypad show and hide
+   * @param {String} name layout's name
+   */
   toggle (name = this.options['name']) {
     if (this.wrap.getAttribute(this.prefix('attr', 'status')) === 'active') {
       this.hide(name)
@@ -419,10 +500,20 @@ export default class Keypad {
     }
   }
 
-  dark (status = true) {
-    this.wrap.setAttribute(this.prefix('attr', 'dark'), !!status)
+  /**
+   * dark theme enabled
+   * @param {Boolean} expect expect use dark theme whether or not
+   */
+  dark (expect = true) {
+    this.wrap.setAttribute(this.prefix('attr', 'dark'), !!expect)
   }
 
+  /**
+   * istype for check object's type
+   * @param {Object?} o needed to checked thing
+   * @param {String} type expected type
+   * @return {Boolean?} is "type" param is undefined return checking result
+   */
   static istype (o, type) {
     const r = Object.prototype.toString.call(o)
       .replace(/^\[object (.+)\]$/, '$1').toLowerCase()

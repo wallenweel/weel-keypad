@@ -46,6 +46,16 @@
             <h2 class="mdl-card__title-text">最基本的用法</h2>
           </div>
           <div class="mdl-card__supporting-text">
+<pre><code class="language-markup">
+&lt;!-- 在 body 底部引入脚本 -->
+&lt;script src="js/keypad.js">&lt;/script>
+&lt;script>
+  // 可以在 Keypad 的全局变量上设置 isMobile 来为所有实例提供移动端检测
+  Keypad.isMobile = /Mobile/.test(navigator.userAgent)
+&lt;/script>
+</code></pre>
+          </div>
+          <div class="mdl-card__supporting-text">
             不需要任何额外的参数就可以将一个初始状态的“键盘”载入到页面中，点击动作栏的按钮操作显示/隐藏。
           </div>
           <div class="mdl-card__supporting-text">
@@ -73,7 +83,7 @@ kypd.hide() // 隐藏
 
         <div id="listen" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text">绑定 & 监听 <code>input</code> 元素</h2>
+            <h2 class="mdl-card__title-text">绑定 & 监听 input 元素</h2>
           </div>
           <div class="mdl-card__supporting-text">
             激活下面的输入框触发键盘。提示： Keypad 不会阻止移动端浏览器对于 <code>input</code> 元素的默认事件而导致行为或者
@@ -101,14 +111,16 @@ var kypd = new Keypad({
 
         <div id="input" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text">绑定存值的 <code>input</code> 元素</h2>
+            <h2 class="mdl-card__title-text">绑定存值的 input 元素</h2>
           </div>
           <div class="mdl-card__supporting-text">
             点击下面的六位数密码框会激活键盘，输入的值则会被存入它下方那个只读属性的 input 中。
           </div>
           <div class="mdl-card__supporting-text">
             <form action="#">
-              <div id="password" class="kypd-passwords js-show-keypad-password"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div id="password" class="kypd-passwords js-show-keypad-password">
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
               <div class="mdl-textfield mdl-js-textfield">
                 <input
                   id="readonly-input" class="mdl-textfield__input" type="text"
@@ -119,15 +131,19 @@ var kypd = new Keypad({
           </div>
           <div class="mdl-card__supporting-text">
 <pre><code class="language-javascript">
-var input = document.querySelector('#readonly-input')
 var password = document.querySelector('#password')
 var items = password.querySelectorAll('i')
+
+var input = document.querySelector('#readonly-input')
 var kypd = new Keypad({
+  // 绑定目标 input 元素
   input: input,
+  // 绑定按键抬起状态
   onend: function (key) {
-    var code = key[2]
+    var code = key[2] // 按键命令
     var n = input.value.length + 1
 
+    // 当前按下的是退格键时
     if (code === 'backspace') {
       n--
 
@@ -153,14 +169,26 @@ var kypd = new Keypad({
   }
 })
 
+// 点击密码框显示键盘
 password.addEventListener('click', ev => kypd.show(), false)
 </code></pre>
+          </div>
+          <div class="mdl-card__actions mdl-card--border">
+            <a class="js-toggle mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              切换
+            </a>
+            <a class="js-show mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              显示
+            </a>
+            <a class="js-hide mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              隐藏
+            </a>
           </div>
         </div>
 
         <div id="options" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text">其它选项</h2>
+            <h2 class="mdl-card__title-text">其它的选项</h2>
           </div>
           <div class="mdl-card__supporting-text">
             在此页面进行一些选项的演示，可结合浏览器的控制台查看对应的 HTML 结构。
@@ -176,12 +204,12 @@ password.addEventListener('click', ev => kypd.show(), false)
           <div class="mdl-card__supporting-text">
             <h4 style="margin-top: 0;">主题颜色</h4>
             <div class="kypd-theme">
-              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="theme-color-1">
-                <input type="radio" id="theme-color-1" class="mdl-radio__button" name="theme-color" value="1" checked>
+              <label id="theme-color-1" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="theme-color-1">
+                <input type="radio" id="color-1" class="mdl-radio__button" name="color" value="1" checked>
                 <span class="mdl-radio__label">暗色</span>
               </label>
-              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="theme-color-2">
-                <input type="radio" id="theme-color-2" class="mdl-radio__button" name="theme-color" value="0">
+              <label id="theme-color-2" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="color-2">
+                <input type="radio" id="color-2" class="mdl-radio__button" name="color" value="0">
                 <span class="mdl-radio__label">浅色</span>
               </label>
             </div>
@@ -202,12 +230,12 @@ password.addEventListener('click', ev => kypd.show(), false)
             
             <h4>切换键盘</h4>
             <div class="kypd-layout">
-              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="layout-1">
-                <input type="radio" id="layout-1" class="mdl-radio__button" name="layout" value="number">
+              <label id="layout-1" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="layout-a1">
+                <input type="radio" id="layout-a1" class="mdl-radio__button" name="layout" value="number">
                 <span class="mdl-radio__label">数字九宫格</span>
               </label>
-              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="layout-2">
-                <input type="radio" id="layout-2" class="mdl-radio__button" name="layout" value="qwer" checked>
+              <label id="layout-2" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="layout-a2">
+                <input type="radio" id="layout-a2" class="mdl-radio__button" name="layout" value="qwer" checked>
                 <span class="mdl-radio__label">简略 QWER</span>
               </label>
             </div>
@@ -218,7 +246,7 @@ password.addEventListener('click', ev => kypd.show(), false)
 var kypd = new Keypad(function (options) {
   options.dark = true // 使用深色主题
   options.name = 'qwer' // 键盘布局修改为 QWER
-  options.hide = true // 点击键盘区域以外的页面部分隐藏
+  options.hide = 'click' // 绑定 body 的 'onclick' 事件，点击键盘区域以外的页面部分隐藏
 
   // 绑定按键按下状态
   options.onstart = function (key) {
@@ -242,6 +270,9 @@ Object.entries(theme).forEach(function (action) {
 
   target.addEventListener('click', function (ev) {
     ev.stopPropagation()
+
+    target.querySelector('input[name]').click()
+
     kypd.dark(name === 'dark')
   }, false)
 })
@@ -258,7 +289,11 @@ Object.entries(control).forEach(function (action) {
 
   target.addEventListener('click', function (ev) {
     ev.stopPropagation()
-    kypd[name]()
+
+    // 获取当前选择的布局
+    var layout = document.querySelector('input[name="layout"][checked]').value
+
+    kypd[name](layout)
   }, false)
 })
 
@@ -273,8 +308,10 @@ Object.entries(layout).forEach(function (action) {
 
   target.addEventListener('click', function (ev) {
     ev.stopPropagation()
-    kypd.hide()
-    kypd.show(name)
+    target.querySelector('input[name]').click()
+
+    // 隐藏上一个布局并显示新的
+    kypd.hide() || kypd.show(name)
   }, false)
 })
 
