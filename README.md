@@ -106,7 +106,7 @@ export const defaultOptions = {
   // true 为载入后立即显示
   show: false, // {Boolean}
 
-  // 点击键盘区域以外的页面部分时隐藏键盘，支持修改事件名， 默认为“click”
+  // 点击键盘区域以外的页面部分时隐藏键盘，支持修改事件名， 默认为“touchstart|mouseup”
   hide: false, // {Boolean|String}
 
   // 默认显示的键盘布局，默认数字键盘，可用值：number, qwer
@@ -169,15 +169,15 @@ export const number = [
   [[7], [8], [9]],
   [[4], [5], [6]],
   [[1], [2], [3]],
-  [['svg[backspace]', null, 'backspace'], [0], ['·', '.']]
+  [['En', null, '@@qwer'], ['.'], [0], ['svg[backspace]', null, 'backspace']]
 ]
 
 // 简略版的 QWER 键盘
 export const qwer = [
   [['q'], ['w'], ['e'], ['r'], ['t'], ['y'], ['u'], ['i'], ['o'], ['p']],
   [['a'], ['s'], ['d'], ['f'], ['g'], ['h'], ['j'], ['k'], ['l']],
-  [['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m']],
-  [['svg[upper]', null, 'upper'], ['Space', ' '], [','], ['.'], ['svg[backspace]', null, 'backspace']]
+  [['svg[upper]', null, 'upper'], ['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m'], ['svg[backspace]', null, 'backspace']],
+  [['123', null, '@@number'], ['Space', ' '], [','], ['.'], ['svg[done]', null, 'enter']]
 ]
 
 // 单个普通按键 “0”
@@ -229,8 +229,8 @@ kypd.listen([, el])
 // 从页面中移除由载 kypd.inject() 入的最后一个
 kypd.remove()
 
-// 更新深色主题，参数 status 默认为 truthy，falsy 则关闭深色主题
-kypd.dark([, status])
+// 更新深色主题，参数 expect 默认为 truthy，falsy 则关闭深色主题
+kypd.dark([, expect])
 
 /** 可使用的属性 */
 kypd.options // 合并后的选项

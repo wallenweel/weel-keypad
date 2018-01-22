@@ -20,9 +20,10 @@ demo('listen', () => {
 })
 
 demo('input', () => {
-  var input = document.querySelector('#readonly-input')
   var password = document.querySelector('#password')
   var items = password.querySelectorAll('i')
+
+  var input = document.querySelector('#readonly-input')
   var kypd = new Keypad({
     input: input,
     onend: function (key) {

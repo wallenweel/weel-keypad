@@ -46,6 +46,16 @@
             <h2 class="mdl-card__title-text">最基本的用法</h2>
           </div>
           <div class="mdl-card__supporting-text">
+<pre><code class="language-markup">
+&lt;!-- 在 body 底部引入脚本 -->
+&lt;script src="js/keypad.js">&lt;/script>
+&lt;script>
+  // 可以在 Keypad 的全局变量上设置 isMobile 来为所有实例提供移动端检测
+  Keypad.isMobile = /Mobile/.test(navigator.userAgent)
+&lt;/script>
+</code></pre>
+          </div>
+          <div class="mdl-card__supporting-text">
             不需要任何额外的参数就可以将一个初始状态的“键盘”载入到页面中，点击动作栏的按钮操作显示/隐藏。
           </div>
           <div class="mdl-card__supporting-text">
@@ -73,7 +83,7 @@ kypd.hide() // 隐藏
 
         <div id="listen" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text">绑定 & 监听 <code>input</code> 元素</h2>
+            <h2 class="mdl-card__title-text">绑定 & 监听 input 元素</h2>
           </div>
           <div class="mdl-card__supporting-text">
             激活下面的输入框触发键盘。提示： Keypad 不会阻止移动端浏览器对于 <code>input</code> 元素的默认事件而导致行为或者
@@ -101,7 +111,7 @@ var kypd = new Keypad({
 
         <div id="input" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text">绑定存值的 <code>input</code> 元素</h2>
+            <h2 class="mdl-card__title-text">绑定存值的 input 元素</h2>
           </div>
           <div class="mdl-card__supporting-text">
             点击下面的六位数密码框会激活键盘，输入的值则会被存入它下方那个只读属性的 input 中。
@@ -119,15 +129,19 @@ var kypd = new Keypad({
           </div>
           <div class="mdl-card__supporting-text">
 <pre><code class="language-javascript">
-var input = document.querySelector('#readonly-input')
 var password = document.querySelector('#password')
 var items = password.querySelectorAll('i')
+
+var input = document.querySelector('#readonly-input')
 var kypd = new Keypad({
+  // 绑定目标 input 元素
   input: input,
+  // 绑定按键抬起状态
   onend: function (key) {
-    var code = key[2]
+    var code = key[2] // 按键命令
     var n = input.value.length + 1
 
+    // 当前按下的是退格键时
     if (code === 'backspace') {
       n--
 
@@ -153,6 +167,7 @@ var kypd = new Keypad({
   }
 })
 
+// 点击密码框显示键盘
 password.addEventListener('click', ev => kypd.show(), false)
 </code></pre>
           </div>
@@ -160,7 +175,7 @@ password.addEventListener('click', ev => kypd.show(), false)
 
         <div id="options" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text">其它选项</h2>
+            <h2 class="mdl-card__title-text">其它的选项</h2>
           </div>
           <div class="mdl-card__supporting-text">
             在此页面进行一些选项的演示，可结合浏览器的控制台查看对应的 HTML 结构。
