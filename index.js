@@ -56,13 +56,15 @@ demo('input', () => {
   })
 
   password.addEventListener('click', ev => kypd.show(), false)
+
+  return kypd
 })
 
 demo('options', () => {
   var kypd = new Keypad(function (options) {
     options.dark = true
     options.name = 'qwer'
-    options.hide = true
+    options.hide = 'click'
 
     options.onstart = function (key) {
       id('options-print-1').textContent = key[0]
@@ -84,6 +86,8 @@ demo('options', () => {
 
     target.addEventListener('click', function (ev) {
       ev.stopPropagation()
+      target.querySelector('input[name]').click()
+
       kypd.dark(name === 'dark')
     }, false)
   })
@@ -100,7 +104,10 @@ demo('options', () => {
 
     target.addEventListener('click', function (ev) {
       ev.stopPropagation()
-      kypd[name]()
+
+      var layout = document.querySelector('input[name="layout"][checked]').value
+
+      kypd[name](layout)
     }, false)
   })
 
@@ -115,8 +122,10 @@ demo('options', () => {
 
     target.addEventListener('click', function (ev) {
       ev.stopPropagation()
-      kypd.hide()
-      kypd.show(name)
+
+      target.querySelector('input[name]').click()
+
+      kypd.hide() || kypd.show(name)
     }, false)
   })
 

@@ -20,7 +20,7 @@
   "unpkg": "dist/keypad.js",
   "files": [
     "src",
-    "dist/*.js",
+    "dist/*.*",
     "index.html"
   ],
   "scripts": {

@@ -360,7 +360,7 @@ export default class Keypad {
     wrap.setAttribute(this.prefix('attr', 'theme'), theme)
     wrap.setAttribute(this.prefix('attr', 'dark'), dark)
 
-    wrap.addEventListener(this.events.start,
+    wrap.addEventListener(this.bodyEvent,
       ev => ev.stopPropagation() || ev.preventDefault(),
       false
     )
@@ -438,17 +438,24 @@ export default class Keypad {
   }
 
   /**
-   * bodyHide for tap body area except keypad wrap
-   * @param {String} flag custom event name
+   * bodyEvent to bodyHide
    */
-  bodyHide (flag = this.options['hide']) {
-    if (!flag) return false
+  get bodyEvent () {
+    const { hide } = this.options
 
-    const _flag = typeof flag === 'string' ? flag : this.events.start
+    return typeof hide === 'string' ? hide : this.events.start
+  }
 
-    document.body.addEventListener(_flag, ev => this.hide(), false)
+  /**
+   * bodyHide for tap body area except keypad wrap
+   */
+  bodyHide () {
+    document.body.addEventListener(this.bodyEvent, ev => {
+      console.log(this.bodyEvent)
+      this.hide()
+    }, false)
 
-    this.wrap.addEventListener(_flag,
+    this.wrap.addEventListener(this.bodyEvent,
       ev => ev.stopPropagation() || ev.preventDefault(),
       false
     )
