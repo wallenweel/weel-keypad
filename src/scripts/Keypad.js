@@ -451,7 +451,6 @@ export default class Keypad {
    */
   bodyHide () {
     document.body.addEventListener(this.bodyEvent, ev => {
-      console.log(this.bodyEvent)
       this.hide()
     }, false)
 
