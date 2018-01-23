@@ -138,9 +138,11 @@ export const defaultOptions = {
   // 暗色主题开关，kypd-<flex|float>wrap[data-kypd-dark=""false]
   dark: false, // {Boolean}
 
-  // 使用 appendChild 方法注入键盘的位置，默认为 body
-  // 值为 falsy 的话则只渲染不注入到页面中，之后手动调用 keypad.inject()
-  body: document.body // {HTMLElement?}
+  // 使用 appendChild 方法注入键盘的位置，默认 document.body
+  body: document.body, // {HTMLElement?}
+
+  // 值为 falsy 的话则只渲染不注入到页面中，之后手动调用 kypd.inject()
+  inject: true
 }
 ```
 

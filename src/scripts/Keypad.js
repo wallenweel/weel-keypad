@@ -26,7 +26,11 @@ export default class Keypad {
       this.options.mobile = Keypad.isMobile
     }
 
-    const { el, input, show, hide, body } = this.options
+    const { el, input, show, hide, body, inject } = this.options
+
+    if (!body) {
+      console.error(`Option "body" is ${body}, maybe you need to wait the body loaded by 'window.onload'.`)
+    }
 
     this.input = input || null
     this.wrap = null
@@ -37,7 +41,7 @@ export default class Keypad {
     this.locked = null
 
     if (el) this.listen()
-    if (body) this.inject()
+    if (inject && body) this.inject()
     if (show) this.show()
     if (hide) this.bodyHide()
   }
@@ -101,7 +105,9 @@ export default class Keypad {
     }
 
     if (typeof reducer[name] === 'function') {
-      return target => reducer[name].call(this, target)
+      return (target, extra) =>
+        reducer[name].call(this, target, extra) ||
+        document.createDocumentFragment()
     }
 
     return target => target
@@ -123,10 +129,10 @@ export default class Keypad {
     const rowReducer = this.reducer('row')
     const keyReducer = this.reducer('key')
 
-    for (const group of layout) {
+    for (const row of layout) {
       const _keyRow = keyRow.cloneNode()
 
-      for (let [keyText, keyValue, keyCode] of group) {
+      for (let [keyText, keyValue, keyCode] of row) {
         const _key = key.cloneNode()
         const _span = span.cloneNode()
 
@@ -178,10 +184,10 @@ export default class Keypad {
         )
 
         _key.appendChild(_span)
-        _keyRow.appendChild(keyReducer(_key))
+        _keyRow.appendChild(keyReducer(_key, [keyText, keyValue, keyCode]))
       }
 
-      content.appendChild(rowReducer(_keyRow))
+      content.appendChild(rowReducer(_keyRow, row))
     }
 
     return content
@@ -352,7 +358,7 @@ export default class Keypad {
 
       this.keypads[name] = _container
 
-      _container.appendChild(contentReducer(_content))
+      _container.appendChild(contentReducer(_content, [name, layout]))
       wrap.appendChild(containerReducer(_container))
     }
 
