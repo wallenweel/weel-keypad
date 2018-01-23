@@ -1,5 +1,5 @@
 /*!
-  * Weel Keypad v0.3.1
+  * Weel Keypad v0.3.2
   * (c) 2018 wallen
   * Released under the MIT License.
   */
@@ -30,6 +30,58 @@ function __$$styleInject(css, ref) {
   } else {
     style.appendChild(document.createTextNode(css));
   }
+}
+
+/* eslint-disable */
+
+if (!Object.entries) Object.entries = function (obj) {
+  var ownProps = Object.keys(obj),
+      i = ownProps.length,
+      resArray = new Array(i); // preallocate the Array
+  while (i--) {
+    resArray[i] = [ownProps[i], obj[ownProps[i]]];
+  }return resArray;
+};
+
+if (!Object.keys) Object.keys = function (o) {
+  if (o !== Object(o)) throw new TypeError('Object.keys called on a non-object');
+  var k = [],
+      p;
+  for (p in o) {
+    if (Object.prototype.hasOwnProperty.call(o, p)) k.push(p);
+  }return k;
+};
+
+if (typeof Object.assign != 'function') {
+  // Must be writable: true, enumerable: false, configurable: true
+  Object.defineProperty(Object, "assign", {
+    value: function assign(target, varArgs) {
+      // .length of function is 2
+      if (target == null) {
+        // TypeError if undefined or null
+        throw new TypeError('Cannot convert undefined or null to object');
+      }
+
+      var to = Object(target);
+
+      for (var index = 1; index < arguments.length; index++) {
+        var nextSource = arguments[index];
+
+        if (nextSource != null) {
+          // Skip over if undefined or null
+          for (var nextKey in nextSource) {
+            // Avoid bugs when hasOwnProperty is shadowed
+            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+              to[nextKey] = nextSource[nextKey];
+            }
+          }
+        }
+      }
+      return to;
+    },
+    writable: true,
+    configurable: true
+  });
 }
 
 var defaultOptions = {
@@ -646,7 +698,7 @@ var Keypad = function () {
           this.options['name'] = layouts[next === layouts.length ? 0 : next];
         }
 
-        if (layouts.includes(_name)) {
+        if (~layouts.indexOf(_name)) {
           this.options['name'] = _name;
         }
 
@@ -989,8 +1041,6 @@ __$$styleInject(css$2);
 
 var css$4 = "kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] {\n  background-color: #1b1d20; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-container, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-container, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-container, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-container {\n    border-top: 1px #111417 solid; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key > span {\n    background-color: #1b1d20;\n    -webkit-box-shadow: 0 1px 2px rgba(63, 84, 107, .431);\n            box-shadow: 0 1px 2px rgba(63, 84, 107, .431); }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"] > span {\n    background-color: #0077ff;\n    color: #1b1d20; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"] > span {\n    background-color: #0077ff;\n    color: #1b1d20; }\n";
 __$$styleInject(css$4);
-
-// import './scripts/polyfills'
 
 module.exports = Keypad;
 //# sourceMappingURL=keypad.common.js.map

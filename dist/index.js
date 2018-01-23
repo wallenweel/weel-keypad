@@ -199,7 +199,8 @@ demo('options', function () {
 
       target.querySelector('input[name]').click();
 
-      kypd.hide() || kypd.show(name);
+      kypd.hide(name === 'number' ? 'qwer' : 'number');
+      kypd.show(name);
     }, false);
   });
 
