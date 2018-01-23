@@ -1,6 +1,6 @@
 {
   "name": "weel-keypad",
-  "version": "0.2.4",
+  "version": "0.3.1",
   "description": "A mobile end first virtual keypad for browser environment.",
   "homepage": "http://keypad.weel.xyz",
   "keywords": [

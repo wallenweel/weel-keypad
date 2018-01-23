@@ -10,7 +10,9 @@
         background-color: inherit;
         border-top: 1px #f5f5f5 solid;
         padding: 8px 4px;
+      }
 
+      &content {
         &[#{$data}locked="upper"] {
           [#{$data}key-code="upper"] > span {
             border-radius: 2px;
@@ -40,12 +42,14 @@
           color: $primary-light;
     
           transition: background-color .25s cubic-bezier(0.075, 0.82, 0.165, 1),
+                      opacity .45s cubic-bezier(0.215, 0.610, 0.355, 1),
                       color .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
         &[#{$data}status="start"] > span {
           background-color: $primary-light;
           color: #ffffff;
+          opacity: .9;
         }
   
         &[#{$data}key-code="enter"] > span {
@@ -63,7 +67,7 @@
 #{$flex} {
   &wrap[#{$data}theme="default"] {
 
-    #{$flex}container {
+    #{$flex}content {
       &[#{$data}name="number"] {
         #{$flex}key {
           width: 0;

@@ -276,7 +276,7 @@ const kypd = new Keypad()
 
 // 2. 使用 kypd.use()，这种方法无法修改实例化后的代码，但是可以用来动态挂载一些仅在此实例中可用的工具方法或者属性，不过无法修改已经渲染过的配置需要的话可以设置选项 "inject = false" ，然后手动 kypd.inject()
 
-kypd.use(smartMobile())
+kypd.use(smartMobile(), 'Smart Mobile')
 ```
 
 

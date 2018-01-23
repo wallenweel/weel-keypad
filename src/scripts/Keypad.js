@@ -52,9 +52,14 @@ export default class Keypad {
     if (hide) this.bodyHide()
   }
 
+  /**
+   * use for loading plugin
+   * @param {Function} plugin plugin module
+   * @param {String} id optional, plugin id or name
+   */
   use (plugin, id) {
     if (typeof plugin !== 'function') {
-      return console.warn(`${id} in Keypad.plugins is not a function.`)
+      return console.warn(`[${id}] in Keypad.plugins is not a function.`)
     }
 
     plugin.call(this)
@@ -365,16 +370,16 @@ export default class Keypad {
 
     for (const [name, layout] of Object.entries(layouts)) {
       const _content = this.generator(layout)
-      const _container = container.cloneNode()
 
-      _container.setAttribute(this.prefix('attr', 'name'), name)
-      _container.setAttribute(this.prefix('attr', 'status'), 'ready')
+      _content.setAttribute(this.prefix('attr', 'name'), name)
+      _content.setAttribute(this.prefix('attr', 'status'), 'ready')
 
-      this.keypads[name] = _container
+      this.keypads[name] = _content
 
-      _container.appendChild(contentReducer(_content, [name, layout]))
-      wrap.appendChild(containerReducer(_container))
+      container.appendChild(contentReducer(_content, [name, layout]))
     }
+
+    wrap.appendChild(containerReducer(container, layouts))
 
     wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
     wrap.setAttribute(this.prefix('attr', 'theme'), theme)
