@@ -12,7 +12,7 @@
 
 ## 安装
 
-> 仅在浏览器环境使用的话采取第一种安装方式即可。
+> 仅在浏览器环境使用的话采取第一种安装方式即可，因为没有覆盖测试设备，可能会需要一些 polyfills 来增加兼容支持。
 
 + 切换至 **master** 分支 [下载 `dist/keypad.min.js`](tree/master/dist/keypad.min.js) （UMD）用于浏览器环境的打包
 + NPM 下载
@@ -274,8 +274,8 @@ Keypad.plugins = [
 // 实例化
 const kypd = new Keypad()
 
-// 2. 使用 kypd.use()，这种方法无法修改实例化后的代码，但是可以用来动态挂载一些仅在此实例中可用的工具方法或者属性，不过无法修改已经渲染过的配置需要的话可以设置选项 "inject = false" ，然后手动 kypd.inject()
-
+// 2. 使用 kypd.use()，这种方法无法修改实例化后的代码，但是可以用来动态挂载一些仅在此实例中可用的
+// 工具方法或者属性，不过无法修改已经渲染过的配置需要的话可以设置选项 "inject = false" ，然后手动 kypd.inject()
 kypd.use(smartMobile(), 'Smart Mobile')
 ```
 

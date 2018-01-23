@@ -304,7 +304,7 @@ export default class Keypad {
         this.options['name'] = layouts[next === layouts.length ? 0 : next]
       }
 
-      if (layouts.includes(_name)) {
+      if (~layouts.indexOf(_name)) {
         this.options['name'] = _name
       }
 
