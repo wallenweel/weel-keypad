@@ -1,5 +1,5 @@
 /*!
-  * Weel Keypad v0.2.3
+  * Weel Keypad v0.3.1
   * (c) 2018 wallen
   * Released under the MIT License.
   */
@@ -65,7 +65,10 @@ var defaultOptions = {
 
   // the wrap element to be injected keypad,
   // support callback to repleace default
-  body: document.body
+  body: document.body,
+
+  // auto inject to body
+  inject: true
 };
 
 var number = [[[7], [8], [9]], [[4], [5], [6]], [[1], [2], [3]], [['En', null, '@@qwer'], ['.'], [0], ['svg[backspace]', null, 'backspace']]];
@@ -236,7 +239,7 @@ var Keypad = function () {
     this.layouts = Object.assign({}, defaultLayouts, layouts);
     this.maps = Object.assign({}, defaultMaps, maps);
 
-    if (typeof Keypad.isMobile !== 'undefined') {
+    if (!Keypad.istype(Keypad.isMobile, 'undefined')) {
       this.options.mobile = Keypad.isMobile;
     }
 
@@ -245,29 +248,82 @@ var Keypad = function () {
         input = _options.input,
         show = _options.show,
         hide = _options.hide,
-        body = _options.body;
+        body = _options.body,
+        inject = _options.inject;
 
 
-    this.input = input || null;
+    if (!body) {
+      console.error('Option "body" is ' + body + ', maybe you need to wait the body loaded by \'window.onload\'.');
+    }
+
     this.wrap = null;
     this.parent = body || null;
+    this.input = input || null;
 
     this.keypads = {};
     this.hightlight = null;
     this.locked = null;
 
+    if (Keypad.istype(Keypad.plugins, 'array')) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = Object.entries(Keypad.plugins)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var _ref = _step.value;
+
+          var _ref2 = slicedToArray(_ref, 2);
+
+          var i = _ref2[0];
+          var plugin = _ref2[1];
+
+          this.use(plugin, i);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+
     if (el) this.listen();
-    if (body) this.inject();
+    if (inject && body) this.inject();
     if (show) this.show();
     if (hide) this.bodyHide();
   }
 
   /**
-   * events according to device type
+   * use for loading plugin
+   * @param {Function} plugin plugin module
+   * @param {String} id optional, plugin id or name
    */
 
 
   createClass(Keypad, [{
+    key: 'use',
+    value: function use(plugin, id) {
+      if (typeof plugin !== 'function') {
+        return console.warn('[' + id + '] in Keypad.plugins is not a function.');
+      }
+
+      plugin.call(this);
+    }
+
+    /**
+     * events according to device type
+     */
+
+  }, {
     key: 'prefix',
 
 
@@ -332,8 +388,8 @@ var Keypad = function () {
       }
 
       if (typeof reducer[name] === 'function') {
-        return function (target) {
-          return reducer[name].call(_this, target);
+        return function (target, extra) {
+          return reducer[name].call(_this, target, extra) || document.createDocumentFragment();
         };
       }
 
@@ -364,13 +420,13 @@ var Keypad = function () {
       var rowReducer = this.reducer('row');
       var keyReducer = this.reducer('key');
 
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
 
       try {
-        for (var _iterator = layout[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var group = _step.value;
+        for (var _iterator2 = layout[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var row = _step2.value;
 
           var _keyRow = keyRow.cloneNode();
 
@@ -424,23 +480,23 @@ var Keypad = function () {
             }, false);
 
             _key.appendChild(_span);
-            _keyRow.appendChild(keyReducer(_key));
+            _keyRow.appendChild(keyReducer(_key, [keyText, _keyValue, keyCode]));
             keyValue = _keyValue;
           };
 
-          var _iteratorNormalCompletion2 = true;
-          var _didIteratorError2 = false;
-          var _iteratorError2 = undefined;
+          var _iteratorNormalCompletion3 = true;
+          var _didIteratorError3 = false;
+          var _iteratorError3 = undefined;
 
           try {
-            _loop2: for (var _iterator2 = group[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-              var _ref = _step2.value;
+            _loop2: for (var _iterator3 = row[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+              var _ref3 = _step3.value;
 
-              var _ref2 = slicedToArray(_ref, 3);
+              var _ref4 = slicedToArray(_ref3, 3);
 
-              var keyText = _ref2[0];
-              var keyValue = _ref2[1];
-              var keyCode = _ref2[2];
+              var keyText = _ref4[0];
+              var keyValue = _ref4[1];
+              var keyCode = _ref4[2];
 
               var _ret = _loop(keyText, keyValue, keyCode);
 
@@ -452,33 +508,33 @@ var Keypad = function () {
                   continue;}
             }
           } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                _iterator2.return();
+              if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                _iterator3.return();
               }
             } finally {
-              if (_didIteratorError2) {
-                throw _iteratorError2;
+              if (_didIteratorError3) {
+                throw _iteratorError3;
               }
             }
           }
 
-          content.appendChild(rowReducer(_keyRow));
+          content.appendChild(rowReducer(_keyRow, row));
         }
       } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
           }
         } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
+          if (_didIteratorError2) {
+            throw _iteratorError2;
           }
         }
       }
@@ -495,11 +551,11 @@ var Keypad = function () {
 
   }, {
     key: 'handleKey',
-    value: function handleKey(ev, when, _ref3) {
-      var _ref4 = slicedToArray(_ref3, 3),
-          keyText = _ref4[0],
-          keyValue = _ref4[1],
-          keyCode = _ref4[2];
+    value: function handleKey(ev, when, _ref5) {
+      var _ref6 = slicedToArray(_ref5, 3),
+          keyText = _ref6[0],
+          keyValue = _ref6[1],
+          keyCode = _ref6[2];
 
       ev.preventDefault();
       ev.stopPropagation();
@@ -660,44 +716,44 @@ var Keypad = function () {
       var contentReducer = this.reducer('content');
       var containerReducer = this.reducer('container');
 
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
 
       try {
-        for (var _iterator3 = Object.entries(layouts)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var _ref5 = _step3.value;
+        for (var _iterator4 = Object.entries(layouts)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var _ref7 = _step4.value;
 
-          var _ref6 = slicedToArray(_ref5, 2);
+          var _ref8 = slicedToArray(_ref7, 2);
 
-          var name = _ref6[0];
-          var layout = _ref6[1];
+          var name = _ref8[0];
+          var layout = _ref8[1];
 
           var _content = this.generator(layout);
-          var _container = container.cloneNode();
 
-          _container.setAttribute(this.prefix('attr', 'name'), name);
-          _container.setAttribute(this.prefix('attr', 'status'), 'ready');
+          _content.setAttribute(this.prefix('attr', 'name'), name);
+          _content.setAttribute(this.prefix('attr', 'status'), 'ready');
 
-          this.keypads[name] = _container;
+          this.keypads[name] = _content;
 
-          _container.appendChild(contentReducer(_content));
-          wrap.appendChild(containerReducer(_container));
+          container.appendChild(contentReducer(_content, [name, layout]));
         }
       } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return) {
-            _iterator3.return();
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
           }
         } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
+          if (_didIteratorError4) {
+            throw _iteratorError4;
           }
         }
       }
+
+      wrap.appendChild(containerReducer(container, layouts));
 
       wrap.setAttribute(this.prefix('attr', 'status'), 'ready');
       wrap.setAttribute(this.prefix('attr', 'theme'), theme);
@@ -741,10 +797,10 @@ var Keypad = function () {
     key: 'remove',
     value: function remove() {
       if (this.wrap && this.parent) {
-        return this.parent.removeChild(this.wrap);
+        return !!this.parent.removeChild(this.wrap);
       }
 
-      return console.log('Has not found "Keypad" that needed to be removed.');
+      return !!console.log('Has not found "Keypad" that needed to be removed.');
     }
 
     /**
@@ -925,10 +981,10 @@ var Keypad = function () {
   return Keypad;
 }();
 
-var css = "kypd-flex-wrap, kypd-wrap {\n  width: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  z-index: 999999999;\n  position: fixed;\n  display: block;\n  -webkit-transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-wrap[data-kypd-status=\"none\"], kypd-wrap[data-kypd-status=\"none\"] {\n    display: none; }\n  kypd-flex-wrap[data-kypd-status=\"ready\"], kypd-wrap[data-kypd-status=\"ready\"] {\n    opacity: 0;\n    visibility: hidden;\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%); }\n  kypd-flex-wrap[data-kypd-status=\"active\"], kypd-wrap[data-kypd-status=\"active\"] {\n    opacity: 1;\n    visibility: visible;\n    -webkit-transform: translateY(0%);\n            transform: translateY(0%); }\n\nkypd-flex-container, kypd-container {\n  width: inherit;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  position: absolute; }\n  kypd-flex-container[data-kypd-status=\"ready\"], kypd-container[data-kypd-status=\"ready\"] {\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%);\n    -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n    transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-container[data-kypd-status=\"active\"], kypd-container[data-kypd-status=\"active\"] {\n    -webkit-transform: translateY(0);\n            transform: translateY(0); }\n  kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-value], kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-value] {\n    text-transform: uppercase; }\n\nkypd-flex-key svg, kypd-key svg {\n  fill: currentColor; }\n\nkypd-flex-container {\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n  kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-content {\n    max-width: 240px; }\n  kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-content {\n    max-width: 560px; }\n\nkypd-flex-content {\n  width: 100%;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key-row {\n  width: 100%;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key, kypd-flex-key > span {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: auto;\n          flex: auto; }\n";
+var css = "kypd-flex-wrap, kypd-wrap {\n  width: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  z-index: 999999999;\n  position: fixed;\n  display: block;\n  -webkit-transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: opacity 0.35s, visibility 0.35s, transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-wrap[data-kypd-status=\"none\"], kypd-wrap[data-kypd-status=\"none\"] {\n    display: none; }\n  kypd-flex-wrap[data-kypd-status=\"ready\"], kypd-wrap[data-kypd-status=\"ready\"] {\n    opacity: 0;\n    visibility: hidden;\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%); }\n  kypd-flex-wrap[data-kypd-status=\"active\"], kypd-wrap[data-kypd-status=\"active\"] {\n    opacity: 1;\n    visibility: visible;\n    -webkit-transform: translateY(0%);\n            transform: translateY(0%); }\n\nkypd-flex-container, kypd-container {\n  width: inherit; }\n\nkypd-flex-content, kypd-content {\n  margin: 0 auto;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1);\n  transition: transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1), -webkit-transform 0.25s cubic-bezier(0.215, 0.61, 0.355, 1); }\n  kypd-flex-content[data-kypd-status=\"ready\"], kypd-content[data-kypd-status=\"ready\"] {\n    opacity: 0;\n    -webkit-transform: translateY(100%);\n            transform: translateY(100%);\n    position: absolute; }\n  kypd-flex-content[data-kypd-status=\"active\"], kypd-content[data-kypd-status=\"active\"] {\n    opacity: 1;\n    -webkit-transform: translateY(0);\n            transform: translateY(0);\n    position: relative; }\n  kypd-flex-content[data-kypd-locked=\"upper\"] [data-kypd-key-value], kypd-content[data-kypd-locked=\"upper\"] [data-kypd-key-value] {\n    text-transform: uppercase; }\n  kypd-flex-content[data-kypd-name=\"number\"], kypd-content[data-kypd-name=\"number\"] {\n    max-width: 240px; }\n  kypd-flex-content[data-kypd-name=\"qwer\"], kypd-content[data-kypd-name=\"qwer\"] {\n    max-width: 560px; }\n\nkypd-flex-key svg, kypd-key svg {\n  fill: currentColor; }\n\nkypd-flex-container {\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-content {\n  width: 100%;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-orient: vertical;\n  -webkit-box-direction: normal;\n      -ms-flex-direction: column;\n          flex-direction: column;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key-row {\n  width: 100%;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-key, kypd-flex-key > span {\n  -webkit-box-align: center;\n      -ms-flex-align: center;\n          align-items: center;\n  -webkit-box-pack: center;\n      -ms-flex-pack: center;\n          justify-content: center;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: auto;\n          flex: auto; }\n";
 __$$styleInject(css);
 
-var css$2 = "kypd-flex-wrap[data-kypd-theme=\"default\"], kypd-wrap[data-kypd-theme=\"default\"] {\n  background-color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-container {\n    background-color: inherit;\n    border-top: 1px #f5f5f5 solid;\n    padding: 8px 4px; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-container[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span {\n      border-radius: 2px;\n      background-color: #0077ff;\n      color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-key {\n    cursor: default;\n    padding: 4px 2px; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key > span {\n      border-radius: 2px;\n      -webkit-box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n              box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n      height: 44px;\n      font-size: 16px;\n      display: -webkit-box;\n      display: -ms-flexbox;\n      display: flex;\n      background-color: #ffffff;\n      color: #0077ff;\n      -webkit-transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n      transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"] > span {\n      background-color: #0077ff;\n      color: #ffffff; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"] > span {\n      border-radius: 8px;\n      background-color: #0077ff;\n      color: #ffffff; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"number\"] kypd-flex-key[data-kypd-key-value=\"0\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key-row:nth-child(2)::before, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key-row:nth-child(2)::after {\n  content: \"\";\n  margin-left: -6px;\n  margin-right: -6px;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 auto;\n          flex: 1 1 auto;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-value=\" \"] {\n    -webkit-box-flex: 6;\n        -ms-flex-positive: 6;\n            flex-grow: 6; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"@@number\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n";
+var css$2 = "kypd-flex-wrap[data-kypd-theme=\"default\"], kypd-wrap[data-kypd-theme=\"default\"] {\n  background-color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-container, kypd-wrap[data-kypd-theme=\"default\"] kypd-container {\n    background-color: inherit;\n    border-top: 1px #f5f5f5 solid;\n    padding: 8px 4px; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-content[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-content[data-kypd-locked=\"upper\"] [data-kypd-key-code=\"upper\"] > span {\n    border-radius: 2px;\n    background-color: #0077ff;\n    color: #ffffff; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key, kypd-wrap[data-kypd-theme=\"default\"] kypd-key {\n    cursor: default;\n    padding: 4px 2px; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key > span {\n      border-radius: 2px;\n      -webkit-box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n              box-shadow: 0 1px 2px rgba(73, 158, 255, .431);\n      height: 44px;\n      font-size: 16px;\n      display: -webkit-box;\n      display: -ms-flexbox;\n      display: flex;\n      background-color: #ffffff;\n      color: #0077ff;\n      -webkit-transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 0.45s cubic-bezier(0.215, 0.61, 0.355, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);\n      transition: background-color 0.25s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 0.45s cubic-bezier(0.215, 0.61, 0.355, 1), color 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-status=\"start\"] > span {\n      background-color: #0077ff;\n      color: #ffffff;\n      opacity: .9; }\n    kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"] kypd-key[data-kypd-key-code=\"enter\"] > span {\n      border-radius: 8px;\n      background-color: #0077ff;\n      color: #ffffff; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"number\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"number\"] kypd-flex-key[data-kypd-key-value=\"0\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"qwer\"] kypd-flex-key-row:nth-child(2)::before, kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"qwer\"] kypd-flex-key-row:nth-child(2)::after {\n  content: \"\";\n  margin-left: -6px;\n  margin-right: -6px;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 auto;\n          flex: 1 1 auto;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex; }\n\nkypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"qwer\"] kypd-flex-key {\n  width: 0; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-value=\" \"] {\n    -webkit-box-flex: 6;\n        -ms-flex-positive: 6;\n            flex-grow: 6; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"enter\"], kypd-flex-wrap[data-kypd-theme=\"default\"] kypd-flex-content[data-kypd-name=\"qwer\"] kypd-flex-key[data-kypd-key-code=\"@@number\"] {\n    -webkit-box-flex: 2;\n        -ms-flex-positive: 2;\n            flex-grow: 2; }\n";
 __$$styleInject(css$2);
 
 var css$4 = "kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"], kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] {\n  background-color: #1b1d20; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-container, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-container, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-container, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-container {\n    border-top: 1px #111417 solid; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key > span {\n    background-color: #1b1d20;\n    -webkit-box-shadow: 0 1px 2px rgba(63, 84, 107, .431);\n            box-shadow: 0 1px 2px rgba(63, 84, 107, .431); }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-status=\"start\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-status=\"start\"] > span {\n    background-color: #0077ff;\n    color: #1b1d20; }\n  kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-flex-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-flex-key[data-kypd-key-code=\"enter\"] > span, kypd-wrap[data-kypd-theme=\"default\"][data-kypd-dark=\"true\"] kypd-key[data-kypd-key-code=\"enter\"] > span {\n    background-color: #0077ff;\n    color: #1b1d20; }\n";
