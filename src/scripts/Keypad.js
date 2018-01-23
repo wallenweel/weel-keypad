@@ -22,7 +22,7 @@ export default class Keypad {
     this.layouts = Object.assign({}, defaultLayouts, layouts)
     this.maps = Object.assign({}, defaultMaps, maps)
 
-    if (typeof Keypad.isMobile !== 'undefined') {
+    if (!Keypad.istype(Keypad.isMobile, 'undefined')) {
       this.options.mobile = Keypad.isMobile
     }
 
@@ -32,18 +32,32 @@ export default class Keypad {
       console.error(`Option "body" is ${body}, maybe you need to wait the body loaded by 'window.onload'.`)
     }
 
-    this.input = input || null
     this.wrap = null
     this.parent = body || null
+    this.input = input || null
 
     this.keypads = {}
     this.hightlight = null
     this.locked = null
 
+    if (Keypad.istype(Keypad.plugins, 'array')) {
+      for (const [i, plugin] of Object.entries(Keypad.plugins)) {
+        this.use(plugin, i)
+      }
+    }
+
     if (el) this.listen()
     if (inject && body) this.inject()
     if (show) this.show()
     if (hide) this.bodyHide()
+  }
+
+  use (plugin, id) {
+    if (typeof plugin !== 'function') {
+      return console.warn(`${id} in Keypad.plugins is not a function.`)
+    }
+
+    plugin.call(this)
   }
 
   /**
@@ -397,10 +411,10 @@ export default class Keypad {
    */
   remove () {
     if (this.wrap && this.parent) {
-      return this.parent.removeChild(this.wrap)
+      return !!this.parent.removeChild(this.wrap)
     }
 
-    return console.log('Has not found "Keypad" that needed to be removed.')
+    return !!console.log('Has not found "Keypad" that needed to be removed.')
   }
 
   /**

@@ -45,6 +45,7 @@ npm i weel-translate
 - [x] 支持 SVG 图片作为按键
 - [x] 支持键盘切换
 - [ ] 支持 contenteditable 属性元素
+- [x] 支持插件机制，动态挂载需要的代码
 
 
 ## 使用说明
@@ -234,12 +235,48 @@ kypd.remove()
 // 更新深色主题，参数 expect 默认为 truthy，falsy 则关闭深色主题
 kypd.dark([, expect])
 
+kypd.use(plugin, [, id])
+
 /** 可使用的属性 */
 kypd.options // 合并后的选项
 kypd.layouts // 合并后的键盘布局
 kypd.maps // 合并后的按键映射
 kypd.wrap // 包裹键盘内容的根元素
 kypd.input // 选项中的 "input" 或者监听后的触发focus 的 input 元素
+```
+
+
+## 自定义插件
+
+> 类似于 `Keypad.isMobile = /Mobile/.test(navigator.userAgent)`，插件 `plugins` 也是挂在 `Keypad` 全局变量上的，下面是使用插件实现的移动端设备检测。
+
+```javascript
+/**
+ * plugin 推荐写法
+ */
+function smartMobile () {
+  var isMobile = /Mobile/.test(navigator.userAgent)
+
+  // 返回的闭包函数中的 this 即已经完成用户配置初始化的 Keypad 对象
+  return function () {
+    this.options.mobile = isMobile
+  }
+}
+
+/* 有两种方式注册 & 执行插件 */
+
+// 1. 如果需要应用到所有实例上的话，最好使用 plugins 来注册，
+// 插件按顺序依次执行
+Keypad.plugins = [
+  smartMobile()
+]
+
+// 实例化
+const kypd = new Keypad()
+
+// 2. 使用 kypd.use()，这种方法无法修改实例化后的代码，但是可以用来动态挂载一些仅在此实例中可用的工具方法或者属性，不过无法修改已经渲染过的配置需要的话可以设置选项 "inject = false" ，然后手动 kypd.inject()
+
+kypd.use(smartMobile())
 ```
 
 
