@@ -22,24 +22,47 @@ export default class Keypad {
     this.layouts = Object.assign({}, defaultLayouts, layouts)
     this.maps = Object.assign({}, defaultMaps, maps)
 
-    if (typeof Keypad.isMobile !== 'undefined') {
+    if (!Keypad.istype(Keypad.isMobile, 'undefined')) {
       this.options.mobile = Keypad.isMobile
     }
 
-    const { el, input, show, hide, body } = this.options
+    const { el, input, show, hide, body, inject } = this.options
 
-    this.input = input || null
+    if (!body) {
+      console.error(`Option "body" is ${body}, maybe you need to wait the body loaded by 'window.onload'.`)
+    }
+
     this.wrap = null
     this.parent = body || null
+    this.input = input || null
 
     this.keypads = {}
     this.hightlight = null
     this.locked = null
 
+    if (Keypad.istype(Keypad.plugins, 'array')) {
+      for (const [i, plugin] of Object.entries(Keypad.plugins)) {
+        this.use(plugin, i)
+      }
+    }
+
     if (el) this.listen()
-    if (body) this.inject()
+    if (inject && body) this.inject()
     if (show) this.show()
     if (hide) this.bodyHide()
+  }
+
+  /**
+   * use for loading plugin
+   * @param {Function} plugin plugin module
+   * @param {String} id optional, plugin id or name
+   */
+  use (plugin, id) {
+    if (typeof plugin !== 'function') {
+      return console.warn(`[${id}] in Keypad.plugins is not a function.`)
+    }
+
+    plugin.call(this)
   }
 
   /**
@@ -101,7 +124,9 @@ export default class Keypad {
     }
 
     if (typeof reducer[name] === 'function') {
-      return target => reducer[name].call(this, target)
+      return (target, extra) =>
+        reducer[name].call(this, target, extra) ||
+        document.createDocumentFragment()
     }
 
     return target => target
@@ -123,10 +148,10 @@ export default class Keypad {
     const rowReducer = this.reducer('row')
     const keyReducer = this.reducer('key')
 
-    for (const group of layout) {
+    for (const row of layout) {
       const _keyRow = keyRow.cloneNode()
 
-      for (let [keyText, keyValue, keyCode] of group) {
+      for (let [keyText, keyValue, keyCode] of row) {
         const _key = key.cloneNode()
         const _span = span.cloneNode()
 
@@ -178,10 +203,10 @@ export default class Keypad {
         )
 
         _key.appendChild(_span)
-        _keyRow.appendChild(keyReducer(_key))
+        _keyRow.appendChild(keyReducer(_key, [keyText, keyValue, keyCode]))
       }
 
-      content.appendChild(rowReducer(_keyRow))
+      content.appendChild(rowReducer(_keyRow, row))
     }
 
     return content
@@ -345,16 +370,16 @@ export default class Keypad {
 
     for (const [name, layout] of Object.entries(layouts)) {
       const _content = this.generator(layout)
-      const _container = container.cloneNode()
 
-      _container.setAttribute(this.prefix('attr', 'name'), name)
-      _container.setAttribute(this.prefix('attr', 'status'), 'ready')
+      _content.setAttribute(this.prefix('attr', 'name'), name)
+      _content.setAttribute(this.prefix('attr', 'status'), 'ready')
 
-      this.keypads[name] = _container
+      this.keypads[name] = _content
 
-      _container.appendChild(contentReducer(_content))
-      wrap.appendChild(containerReducer(_container))
+      container.appendChild(contentReducer(_content, [name, layout]))
     }
+
+    wrap.appendChild(containerReducer(container, layouts))
 
     wrap.setAttribute(this.prefix('attr', 'status'), 'ready')
     wrap.setAttribute(this.prefix('attr', 'theme'), theme)
@@ -391,10 +416,10 @@ export default class Keypad {
    */
   remove () {
     if (this.wrap && this.parent) {
-      return this.parent.removeChild(this.wrap)
+      return !!this.parent.removeChild(this.wrap)
     }
 
-    return console.log('Has not found "Keypad" that needed to be removed.')
+    return !!console.log('Has not found "Keypad" that needed to be removed.')
   }
 
   /**

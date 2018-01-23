@@ -81,6 +81,7 @@ kypd.hide() // 隐藏
           </div>
         </div>
 
+
         <div id="listen" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
             <h2 class="mdl-card__title-text">绑定 & 监听 input 元素</h2>
@@ -108,6 +109,7 @@ var kypd = new Keypad({
 </code></pre>
           </div>
         </div>
+
 
         <div id="input" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
@@ -186,6 +188,7 @@ password.addEventListener('click', ev => kypd.show(), false)
           </div>
         </div>
 
+        
         <div id="options" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
             <h2 class="mdl-card__title-text">其它的选项</h2>
@@ -322,7 +325,194 @@ function id (id) {
           </div>
         </div>
 
-        <div style="min-height: 460px; width: 100%;"></div>
+
+        
+        <div id="wasd" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">自定义键盘布局</h2>
+          </div>
+          <div class="mdl-card__supporting-text">
+            使用一个三维数组来直观地制作一个键盘布局，这里演示一个简易的方向键盘。
+          </div>
+          <div class="mdl-card__supporting-text">
+<pre><code class="language-javascript">
+var kypd = new Keypad({
+  name: 'wasd', // 使用新增布局的名字
+  multiple: false, // 仅渲染当前键盘布局
+  reducer: {
+    // 这里使用钩子来简单修改下键盘容器的样式
+    content: function (target) {
+      target.style.maxWidth = '240px'
+      return target
+    },
+    // 修改用于占位的按键
+    key: function (target, key) {
+      if (key[1] === '') {
+        target.textContent = ''
+        target.style.height = '0'
+        target.style.padding = '0'
+      }
+      return target
+    }
+  }
+}, {
+  // 新增的键盘布局
+  wasd: [
+    [[''], ['↑'], ['']],
+    [['←'], ['↓'], ['→']]
+  ]
+})
+</code></pre>
+          </div>
+          <div class="mdl-card__actions mdl-card--border">
+            <a class="js-toggle mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              切换
+            </a>
+            <a class="js-show mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              显示
+            </a>
+            <a class="js-hide mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              隐藏
+            </a>
+          </div>
+        </div>
+  
+
+        
+        <div id="plugins" class="mdl-cell mdl-cell--12-col mdl-card mdl-shadow--2dp">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">自定义插件</h2>
+          </div>
+          <div class="mdl-card__supporting-text">
+            一些与业务需求相关性高但并不适合整合进库中的代码可以编写成扩展来动态增强 Keypad 的可用性。
+            下面的例子实现了一个带输入框的键盘（为避免移动端异常，使用的是 readonly 属性的 input 元素）。
+          </div>
+          <div class="mdl-card__supporting-text">
+            <form action="#">
+              <div class="mdl-textfield mdl-js-textfield">
+                <input
+                  id="plugins-input" class="mdl-textfield__input" type="text"
+                  readonly
+                  placeholder="点击“切换|显示”唤出键盘……">
+              </div>
+            </form>
+          </div>
+          <div class="mdl-card__supporting-text">
+<pre><code class="language-javascript">
+function pluginDemo () {
+  var style = document.createElement('style')
+  var css = [
+    'kypd-flex-toolbar {',
+    'background-color: #f5f5f5;',
+    'height: 56px; width: 100%;',
+    'margin-bottom: 8px;',
+    'display: flex; align-items: center; justify-content: flex-end;',
+    '}',
+    'kypd-flex-toolbar .close {',
+    'background: white; color: #0077ff; margin: 0 12px; border-radius: 2px;',
+    'height: 44px; min-width: 64px; font-size: 14px; border: none;',
+    'display: flex;  flex: none; justify-content: center; align-items: center;',
+    '}',
+    'kypd-flex-toolbar .input {',
+    'background-color: white; border-radius: 2px;',
+    'font-size: 16px; color: #333; text-indent: .5em;',
+    'height: 44px; width: 100%; border: 0; padding: 0; margin-left: 12px;',
+    '}'
+  ].join('')
+
+  // 在 head 中插入一些样式
+  style.innerHTML = css
+  document.head.appendChild(style)
+
+  // 以上代码会在注册插件时生效，而返回的这个闭包函数只有在实例化时才会运行
+  return function () {
+    // 向键盘布局的父级容器注入一个工具条
+    this.options.reducer.container = function (target) {
+      var toolbar = document.createElement(this.prefix('elem', 'toolbar'))
+      var input = document.createElement('input')
+      var close = document.createElement('button')
+
+      input.type = 'text'
+      input.placeholder = 'Type Enter Key To Send.'
+      input.readOnly = true
+      input.classList.add('input')
+
+      this.input = input
+
+      close.textContent = 'Close'
+      close.classList.add('close')
+      close.addEventListener(this.events.start, function () { this.hide() }.bind(this), false)
+
+      toolbar.appendChild(input)
+      toolbar.appendChild(close)
+
+      target.insertBefore(toolbar, target.firstChild)
+
+      return target
+    }
+
+    // 在 options 中添加一个额外的 onsend 选项给用户
+    this.options.reducer.key = function (target, key) {
+      if (key[2] === 'enter') {
+        target.addEventListener(this.events.end, ev => {
+          if (typeof this.options.onsend !== 'function') return true
+          this.options.onsend.call(key, this.input.value)
+        }, false)
+      }
+
+      return target
+    }
+  }
+}
+</code></pre>
+<pre><code class="language-javascript">
+// 第一种方式，全局注册插件，之后所有的实例都可以使用这个插件
+// 像示例这种需要在注入前动用 options 用户选项的插件最好使用这种方法
+Keypad.plugins = [
+  pluginDemo()
+]
+
+var kypd = new Keypad({
+  name: 'qwer',
+  // 使用插件提供的选项接口
+  onsend: function (content) {
+    document.querySelector('#plugins-input').value = content
+  }
+})
+</code></pre>
+<pre><code class="language-javascript">
+// 第二种方式，使用 kypd.use() 接口为单一实例注册插件
+var kypd = new Keypad({
+  name: 'qwer',
+  // 使用插件提供的选项接口
+  onsend: function (content) {
+    document.querySelector('#plugins-input').value = content
+  },
+  // 实例化完成后不要对页面进行注入
+  inject: false
+})
+
+// 注册插件，第二个可选参数可以提供插件的名称，方便定为错误
+kypd.use(pluginDemo(), 'Demo Plugin')
+
+// 在完成插件的注册后再对页面进行注入操作
+kypd.inject()
+</code></pre>
+          </div>
+          <div class="mdl-card__actions mdl-card--border">
+            <a class="js-toggle mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              切换
+            </a>
+            <a class="js-show mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              显示
+            </a>
+            <a class="js-hide mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+              隐藏
+            </a>
+          </div>
+        </div>
+  
+        
       </div>
     </main>
   </div>

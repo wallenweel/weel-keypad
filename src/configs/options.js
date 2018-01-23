@@ -31,5 +31,8 @@ export default {
 
   // the wrap element to be injected keypad,
   // support callback to repleace default
-  body: document.body
+  body: document.body,
+
+  // auto inject to body
+  inject: true
 }
