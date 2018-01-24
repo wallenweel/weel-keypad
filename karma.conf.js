@@ -39,6 +39,7 @@ module.exports = function(config) {
       },
       plugins: [
         require('rollup-plugin-node-resolve')(),
+        require('rollup-plugin-commonjs')(),
         require('rollup-plugin-postcss')({
           plugins: [
             require('postcss-simple-vars')(),
@@ -49,7 +50,8 @@ module.exports = function(config) {
         }),
         require('rollup-plugin-babel')({
           exclude: 'node_modules/**',
-          plugins: ['external-helpers']
+          runtimeHelpers: true,
+          plugins: ['external-helpers', 'transform-runtime']
         }),
         require('rollup-plugin-istanbul')()
       ]
@@ -105,7 +107,8 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: process.env.TRAVIS,
+    // singleRun: process.env.TRAVIS,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous
