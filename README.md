@@ -12,7 +12,7 @@
 
 ## 安装
 
-> 仅在浏览器环境使用的话采取第一种安装方式即可，因为没有覆盖测试设备，可能会需要一些 polyfills 来增加兼容支持。
+> 仅在浏览器环境使用的话采取第一种安装方式即可，因为没有覆盖测试所有的设备浏览器，可能会需要 babel-polyfills 来增加旧的浏览器对 ES5 的兼容支持。
 
 + 切换至 **master** 分支 [下载 `dist/keypad.min.js`](tree/master/dist/keypad.min.js) （UMD）用于浏览器环境的打包
 + NPM 下载

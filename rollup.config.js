@@ -1,6 +1,7 @@
 import resolve from 'rollup-plugin-node-resolve'
 import eslint from 'rollup-plugin-eslint'
 import babel from 'rollup-plugin-babel'
+import commonjs from 'rollup-plugin-commonjs'
 
 import uglify from 'rollup-plugin-uglify'
 import { minify } from 'uglify-es'
@@ -23,6 +24,7 @@ const banner = `/*!
 
 const plugins = [
   resolve(),
+  commonjs(),
   postcss({
     plugins: [
       simplevars(),
@@ -33,7 +35,8 @@ const plugins = [
   }),
   eslint({ exclude: ['src/**/*.scss'] }),
   babel({
-    exclude: 'node_modules/**'
+    exclude: 'node_modules/**',
+    runtimeHelpers: true
   }),
   (process.env.NODE_ENV === 'production' && uglify({}, minify))
 ]

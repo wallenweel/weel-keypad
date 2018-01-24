@@ -1,5 +1,3 @@
-import './scripts/polyfills'
-
 import Keypad from './scripts/Keypad'
 
 import './styles/main.scss'
