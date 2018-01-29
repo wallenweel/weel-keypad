@@ -17,7 +17,7 @@
 + 切换至 **master** 分支 [下载 `dist/keypad.min.js`](tree/master/dist/keypad.min.js) （UMD）用于浏览器环境的打包
 + NPM 下载
 ```bash
-npm i weel-translate
+npm i weel-keypad
 ```
 + 克隆 **develop** 分支到本地，按照 [构建项目](#构建项目) 部分打包文件
 
@@ -292,12 +292,6 @@ npm install
 # 启动项目开发环境并监听源文件
 npm start
 
-# 开发时打包
-npm run bundle
-
-# 发布时打包
-npm run build
-
-# 测试
-npm test
+# 完整测试&打包
+npm run release
 ```
