@@ -7,14 +7,18 @@
 [![codecov](https://codecov.io/gh/wallenweel/weel-keypad/branch/develop/graph/badge.svg)](https://codecov.io/gh/wallenweel/weel-keypad)
 
 
-移动端优先的虚拟键盘，开箱即用支持深度定制，按需可对所有 DOM 节点进行调整或重写，完全分离结构与样式，布局、展现方式及主题样式交由 CSS 实现。
+[demo]: http://keypad.weel.xyz/
+
+一个使用 Javascript 实现的虚拟键盘（核心库），提供了深浅色两种默认皮肤，开箱即用（[Demo][demo]），布局目前采用 Flex 优先移动设备，支持通过接口来按需对键盘进行深度定制。
 
 
 ## 安装
 
-> 仅在浏览器环境使用的话采取第一种安装方式即可，因为没有覆盖测试所有的设备浏览器，可能会需要 babel-polyfills 来增加旧的浏览器对 ES5 的兼容支持。
+> 仅在浏览器环境使用的话采取第一种安装方式即可。没有覆盖测试所有的设备浏览器，可能会需要 babel-polyfills 来增加老旧的浏览器内核对 ES5 的兼容支持。
 
-+ 切换至 **master** 分支 [下载 `dist/keypad.min.js`](tree/master/dist/keypad.min.js) （UMD）用于浏览器环境的打包
+[keypad.min.js]: https://raw.githubusercontent.com/wallenweel/weel-keypad/master/dist/keypad.min.js
+
++ 切换至 **master** 分支下载 [`dist/keypad.min.js`][keypad.min.js] （UMD）用于浏览器环境的打包
 + NPM 下载
 ```bash
 npm i weel-keypad
@@ -149,7 +153,7 @@ export const defaultOptions = {
 
 ### 自定义布局 `layouts`
 
-> 键盘布局使用三维数组实现，可以很直观的创建自由度很高的布局。
+> 键盘布局使用三维数组实现，可以自由地创建布局。
 
 #### 说明
 
